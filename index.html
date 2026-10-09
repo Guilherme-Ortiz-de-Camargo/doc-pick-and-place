@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monitoramento em Pick-and-Place</title>
+<link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+    <div class="page">
+        <div class="cover">
+            <img class="logo-empresa"
+                src="images/vibra-data-logo.png"
+                alt="Vibra Data — Monitoramento de Vibração em Máquinas">
+    
+                <h1>Monitoramento em Pick-and-Place</h1>
+                            
+                <div class="integrantes">
+                    <strong>INTEGRANTES</strong>
+                    <span>AARON CUTIPA CANAVIRI</span>
+                    <span>DIOGO YUDI DUARTE TATENO</span>
+                    <span>GUILHERME ORTIZ DE CAMARGO</span>
+                    <span>MATHEUS NOCELLI MORIGUTI</span>
+                    <span>VINÍCIUS DIAS DA SILVA</span>
+                </div>
+            </div>
+        
+        <h2>1. Contexto de negócio</h2>
+            <p>Máquinas industriais como as <strong>Pick-and-Place</strong> operam em ciclos repetitivos e com alta exigência de disponibilidade. Em um ambiente de produção contínua, qualquer degradação mecânica silenciosa pode evoluir para uma falha funcional antes que a equipe perceba a mudança de condição no momento adequado. Esse tipo de equipamento depende diretamente de ajustes de alinhamento, balanço, folgas e desgaste de componentes rotativos; por isso, a vibração e a temperatura tornam-se indicadores estratégicos para a manutenção preditiva.</p>
+
+            <p>O desafio central de negócio não é apenas o custo do conserto, mas a perda de capacidade produtiva provocada por falhas que não são antecipadas. Quando um conjunto mecânico, como rolamento, eixo, acoplamento ou estrutura de suporte, começa a apresentar vibração excessiva ou aquecimento anormal, a máquina pode continuar operando por um período antes de falhar de forma mais severa. Esse intervalo é crítico: é o momento em que a empresa pode agir, mas apenas quando há dados contínuos e históricos confiáveis para comparar o comportamento atual com uma linha de base de operação normal.</p>
+
+            <p>O impacto comercial vai além da manutenção imediata. Uma parada não planejada gera atraso de pedidos, desperdício de materiais em processo, uso de mão de obra de emergência, redução do rendimento da linha e risco de desvio em relação às metas de produção. Em plantas que dependem da continuidade operacional, essas perdas são frequentemente mais relevantes do que o custo direto do componente ou da intervenção técnica.</p>
+
+            <p>Este projeto busca gerar tempo de resposta: identificar sinais de degradação enquanto ainda existe oportunidade de planejar uma inspeção, antes que a falha comprometa a produção.</p>
+
+        <h3>1.1 — Case</h3>
+            <p>Um exemplo relevante para esta proposta é a operação global da Flex, uma das maiores empresas de manufatura eletrônica do mundo. Em reportagem publicada pela IndustryWeek, a unidade da Flex em Althofen, na Áustria, foi apresentada como um dos ambientes industriais mais avançados da companhia, reunindo conceitos de Indústria 4.0, Internet das Coisas Industrial (IIoT), Inteligência Artificial, Digital Twin e manutenção preditiva.</p>
+
+            <p>Nessa operação, as linhas SMT (Surface Mount Technology) e as máquinas Pick-and-Place são consideradas ativos críticos para a produção. Segundo os gestores da Flex, qualquer parada não planejada em equipamentos desse tipo pode afetar diretamente a produtividade, a qualidade e os prazos de entrega aos clientes.</p>
+
+            <p>A empresa implementou uma arquitetura baseada em sensores distribuídos, coleta contínua de dados operacionais e plataformas de análise em tempo real. O objetivo é transformar informações provenientes das máquinas em indicadores capazes de apoiar decisões de manutenção e operação antes que ocorram falhas críticas.</p>
+
+            <p>Na operação da planta, os responsáveis destacaram que a transformação digital não está centrada apenas na automação, mas principalmente na capacidade de utilizar dados para aumentar a eficiência, reduzir desperdícios e melhorar a disponibilidade dos equipamentos.</p>
+
+            <p>Esse contexto reforça a relevância do projeto, pois demonstra que o monitoramento contínuo de ativos industriais é uma prática já consolidada em operações de manufatura avançada.</p>
+
+            <div class="journey-outcome">
+            A Flex utiliza monitoramento contínuo, análise de dados e manutenção preditiva para aumentar a disponibilidade dos equipamentos e reduzir paradas não planejadas, princípios diretamente alinhados aos objetivos deste projeto.
+            </div>
+
+        <h3>1.2 — Origem do desafio operacional</h3>
+            <p>O problema central surge quando a empresa conta com uma máquina crítica, mas não dispõe de uma série histórica confiável sobre a sua condição mecânica. Inspeções visuais, medições manuais e relatos de operadores continuam sendo importantes, porém são pontuais e dependem do momento em que a equipe observa o equipamento. Uma alteração que ocorre entre duas inspeções pode não ser registrada. Além disso, sem dados anteriores, torna-se difícil distinguir um comportamento normal de um desvio relevante.</p>
+
+            <p>A ausência de histórico também prejudica a análise de causa. Quando a máquina apresenta erro de posicionamento, ruído, perda de velocidade ou parada, a equipe precisa investigar com pouca evidência sobre a evolução do evento. O resultado pode ser uma troca preventiva desnecessária, uma manutenção demorada ou a retomada da operação sem que a causa tenha sido completamente compreendida.</p>
+
+            <div class="journey-outcome">O monitoramento não pretende identificar, por si só, a causa definitiva da falha. Sua função é registrar sinais consistentes, comparar o comportamento atual com uma referência e indicar que uma inspeção técnica deve ser priorizada. O diagnóstico final continua sob responsabilidade da manutenção e da engenharia.</div>
+
+        <h3>1.3 — Importância do MPU6050 para a análise de vibração</h3>
+            <p>O <strong>MPU6050</strong> será utilizado para medir aceleração nos eixos X, Y e Z. A leitura tridimensional é importante porque a vibração pode se manifestar de maneira diferente conforme a direção do movimento e o ponto de instalação do sensor. A análise dos eixos permite observar alterações de amplitude, impactos, oscilações e mudanças no padrão de funcionamento da máquina.</p>
+
+            <p>A partir das amostras, o sistema poderá calcular indicadores como RMS, valor de pico, variação por eixo, tendência e, em uma etapa posterior, componentes de frequência por FFT. Esses indicadores tornam o sinal bruto mais útil para a equipe: o histórico deixa de ser apenas uma sequência de números e passa a representar o comportamento mecânico do ativo ao longo do tempo.</p>
+
+        <h3>1.4 — Importância do DS18B20 para a análise térmica</h3>
+            <p>O <strong>DS18B20</strong> será utilizado para acompanhar a temperatura em um ponto definido da máquina. A temperatura complementa a vibração porque algumas falhas aparecem simultaneamente como alteração mecânica e aquecimento, enquanto outras podem apresentar primeiro um comportamento térmico anormal. A medição ajuda a identificar atrito, sobrecarga, ventilação insuficiente, aquecimento de componentes e mudanças no ambiente de operação.</p>
+
+            <p>A combinação entre temperatura e vibração reduz o risco de interpretar um único sinal de forma isolada. Uma vibração momentânea pode ser causada por uma condição passageira; uma elevação térmica isolada pode estar relacionada ao ambiente. Quando os sinais são observados em conjunto e ao longo do tempo, a equipe consegue investigar com mais contexto e reduzir falsos alarmes.</p>
+
+        <h3>1.5 — Máquinas Pick-and-Place com sensores IoT</h3>
+
+            <p>As máquinas Pick-and-Place estão entre os ativos mais importantes das linhas SMT (Surface Mount Technology), sendo responsáveis pelo posicionamento automático de milhares de componentes eletrônicos nas placas de circuito. Sua operação exige elevada precisão mecânica, repetibilidade e disponibilidade, pois pequenas variações podem impactar diretamente a qualidade do produto final.</p>
+
+            <p>Durante o funcionamento, diversos componentes mecânicos estão sujeitos a desgaste progressivo, incluindo motores, rolamentos, fusos, correias, sistemas de movimentação linear e cabeçotes de posicionamento. Em muitos casos, o equipamento continua operando mesmo após o início da degradação, dificultando a identificação precoce do problema apenas por inspeções visuais ou observação dos operadores.</p>
+
+            <p>A vibração é um dos primeiros sinais físicos de alteração na condição mecânica de um equipamento industrial. Desalinhamentos, folgas, desgaste de rolamentos, desequilíbrios e problemas de movimentação normalmente provocam mudanças no comportamento vibratório antes da ocorrência de falhas mais graves. Da mesma forma, aumentos anormais de temperatura podem indicar atrito excessivo, sobrecarga mecânica, deficiência de lubrificação ou degradação de componentes internos.</p>
+
+            <p>Ao instalar sensores MPU6050 e DS18B20 em uma máquina Pick-and-Place, torna-se possível acompanhar continuamente esses indicadores e construir um histórico operacional do equipamento. Esse histórico permite comparar o comportamento atual com padrões de operação normal, facilitando a identificação de desvios que poderiam passar despercebidos em inspeções pontuais.</p>
+
+            <p>Além da manutenção preditiva, os dados coletados podem apoiar análises de disponibilidade, confiabilidade e eficiência operacional. A equipe de manutenção passa a possuir evidências objetivas sobre a evolução da condição do ativo, reduzindo a dependência exclusiva de percepções subjetivas ou da ocorrência de falhas para iniciar investigações.</p>
+
+            <p>Essa abordagem está alinhada aos princípios de Indústria 4.0 adotados pela Flex. Na planta de Althofen, mais de 500 dispositivos IIoT coletam continuamente dados dos equipamentos para alimentar plataformas analíticas, modelos preditivos e sistemas de suporte à decisão. Os gestores da empresa destacam que os sensores permitem transformar eventos físicos da operação em informações úteis para evitar paradas não planejadas, melhorar a eficiência energética e aumentar a disponibilidade dos ativos industriais.</p>
+
+            <div class="journey-outcome">
+            O objetivo dos sensores não é apenas medir vibração e temperatura. Seu principal valor está em transformar sinais físicos da máquina em informações que permitam agir antes que pequenas anomalias evoluam para falhas capazes de interromper a produção.
+            </div>
+
+        <h3>1.6 — Funcionamento integrado da solução</h3>
+            <p>O MPU6050 e o DS18B20 serão conectados ao <strong>ESP32</strong>, que realizará a aquisição, a validação inicial e o processamento local das leituras. O microcontrolador poderá filtrar valores inválidos, registrar marcações de tempo, organizar pacotes e manter um buffer temporário quando a conexão estiver indisponível. Depois, os dados serão encaminhados por comunicação segura para a plataforma em nuvem.</p>
+
+            <p>Na nuvem, a arquitetura AWS e Azure prevista no projeto separa ingestão, armazenamento, processamento, observabilidade e visualização. Os dados brutos devem ser preservados para auditoria e reprocessamento; os dados tratados podem alimentar indicadores, regras de anomalia e dashboard. Essa divisão permite que a empresa tenha rastreabilidade do dado desde o sensor até a decisão de manutenção.</p>
+
+        <h3>1.7 — Necessidade de negócio e decisão de execução</h3>
+            <p>A experiência da Flex demonstra que a decisão de investir em monitoramento contínuo não ocorre apenas por questões técnicas. Os gestores destacam que a previsibilidade operacional se tornou um diferencial competitivo. Quanto maior a capacidade de antecipar problemas, menor o impacto financeiro causado por paradas inesperadas, atrasos na produção e desperdício de materiais.</p>
+
+            <p>Outro aspecto citado é a necessidade de transformar grandes volumes de dados em informações acionáveis. O simples armazenamento das leituras não gera valor. O benefício surge quando os dados são convertidos em indicadores, tendências e alertas capazes de apoiar decisões da operação e da manutenção.</p>
+
+            <p>A execução se justifica quando o impacto de uma parada supera o esforço de monitorar o equipamento. Uma falha pode causar perda de produção, atraso, retrabalho, mobilização emergencial e dificuldade para identificar a causa. O investimento em sensores, comunicação e armazenamento permite substituir decisões baseadas apenas em percepção por evidências históricas úteis para operadores, manutenção, engenharia e gestão.</p>
+
+        <h3>1.8 — Objetivo e resultados pretendidos</h3>
+            <p>O objetivo é validar um protótipo capaz de medir vibração e temperatura, processar leituras, armazenar histórico e apresentar informações úteis à manutenção. O fluxo completo deverá conectar sensor, ESP32, comunicação, nuvem, indicadores, alerta e investigação, gerando uma referência de operação normal e uma base para futuras ampliações.</p>
+
+            <p>O sistema apoiará a manutenção sem substituir inspeções, instrumentos profissionais ou o julgamento técnico.</p>
+
+        <h3>1.9 — Escopo</h3>
+            <p>O escopo inicial contempla uma máquina, um conjunto de sensores, um ESP32, comunicação por Wi-Fi, processamento básico, armazenamento histórico, indicadores de vibração e temperatura, regras iniciais de anomalia e dashboard. A primeira versão deve priorizar a confiabilidade da medição e a qualidade do histórico antes de incluir análises avançadas.</p>
+
+        <h3>1.10 — Limites e evolução</h3>
+            <p>O MVP não inclui diagnóstico automático definitivo, certificação de segurança funcional, integração imediata com ERP/MES, monitoramento de dezenas de máquinas ou previsão de qualquer falha por machine learning. Essas evoluções dependem de histórico suficiente, validação técnica e critérios de governança.</p>
+            
+        <h3>1.11 — Benefícios e critérios de sucesso</h3>
+            <p>Os benefícios esperados são maior disponibilidade, intervenções mais planejadas, histórico de condição e priorização técnica das inspeções. O projeto será bem-sucedido quando os sensores apresentarem leituras estáveis, os dados forem transmitidos e armazenados com rastreabilidade, o dashboard mostrar tendências compreensíveis e cada alerta puder ser relacionado a uma investigação. O alerta será sempre um indício, nunca um diagnóstico automático.</p>
+
+        <h3>1.12 — Cronograma de execução</h3>
+            <table>
+                <tr><th>Fase</th><th>Período</th><th>Entrega e justificativa</th></tr>
+                <tr><td>1. Diagnóstico do ativo e requisitos</td><td>Semana 1</td><td>Definição do ponto de instalação, variáveis, riscos e indicadores necessários.</td></tr>
+                <tr><td>2. Montagem e calibração</td><td>Semana 2</td><td>MPU6050, DS18B20 e ESP32 instalados e comparados com medições de referência.</td></tr>
+                <tr><td>3. Aquisição e processamento local</td><td>Semana 3</td><td>Filtros, validações, timestamps, cálculo inicial e buffer no ESP32.</td></tr>
+                <tr><td>4. Comunicação e nuvem</td><td>Semana 4</td><td>Transmissão segura, ingestão e armazenamento separado na arquitetura AWS/Azure.</td></tr>
+                <tr><td>5. Histórico e baseline</td><td>Semana 5</td><td>Coleta de operação normal e definição da referência de comportamento do ativo.</td></tr>
+                <tr><td>6. Indicadores e anomalias</td><td>Semana 6</td><td>RMS, pico, temperatura, tendência e regras iniciais para investigação.</td></tr>
+                <tr><td>7. Dashboard e validação</td><td>Semana 7</td><td>Painel, testes controlados, avaliação dos alertas e documentação da solução.</td></tr>
+            </table>
+
+        <h2>2. Obstáculos a serem detectados</h2>
+        <p>Os obstáculos do MVP concentram-se em fixação inadequada, ruído de medição, taxa de amostragem insuficiente, ambiente adverso, instabilidade de Wi-Fi, perda de dados e histórico curto. Esses pontos serão tratados por calibração, filtragem, buffer local, validação das leituras e coleta de períodos normais antes da definição dos limiares.</p>
+
+        <h2>3. Visão resumida da solução</h2>
+        <table>
+            <tr><th>Etapa</th><th>O que acontece</th><th>Resultado</th></tr>
+            <tr><td>1. Sensoriamento</td><td>MPU6050 mede vibração; DS18B20 mede temperatura.</td><td>Dados brutos X/Y/Z e °C.</td></tr>
+            <tr><td>3. Pré-processamento</td><td>ESP32 Filtra, valida e converte dados com leituras periódicas.</td><td>Informações confiáveis.</td></tr>
+            <tr><td>4. Transmissão</td><td>Dados relevantes enviados via Wi-Fi.</td><td>Redução de tráfego e ruído.</td></tr>
+            <tr><td>5. Armazenamento</td><td>Servidor registra histórico.</td><td>Base de dados organizada.</td></tr>
+            <tr><td>6. Visualização</td><td>Dashboard apresenta gráficos e alertas.</td><td>Apoio à decisão.</td></tr>
+        </table>
+    
+        <h2>4. Lean Inception</h2>
+        <h3>4.1 — O produto é / não é / faz / não faz</h3>
+        <table>
+            <tr><th>É</th><th>Não é</th><th>Faz</th><th>Não faz</th></tr>
+            <tr><td>Sistema IoT para monitoramento de condição.</td><td>Substituto da equipe técnica ou da manutenção especializada.</td><td>Coleta dados de vibração e temperatura continuamente.</td><td>Conserta a máquina ou confirma sozinho a causa de uma falha.</td></tr>
+            <tr><td>Sistema de monitoramento aplicado à uma máquina Pick-and-Place.</td><td>Sistema industrial certificado para qualquer ambiente ou equipamento.</td><td>Registra e organiza um histórico das medições.</td><td>Garante que uma falha ocorrerá ou não ocorrerá.</td></tr>
+            <tr><td>Ferramenta de apoio à decisão da manutenção baseada em evidências.</td><td>Instrumento de segurança funcional ou sistema de proteção da máquina.</td><td>Apresenta indicadores, tendências e alertas para investigação.</td><td>Substitui inspeções, diagnósticos ou decisões de técnicos especializados.</td></tr>
+            <tr><td>Solução de aquisição e análise de dados.</td><td>Um sistema universal para qualquer tipo de máquina e machine learning.</td><td>Calcula indicadores como RMS, picos, tendência e temperatura.</td><td>Promete diagnosticar definitivamente a causa de uma falha.</td></tr>
+            <tr><td>Protótipo de manutenção orientada por dados.</td><td>Uma solução pronta para produção em escala industrial.</td><td>Permite acompanhar a evolução do comportamento do equipamento.</td><td>Elimina completamente a necessidade de manutenção preventiva.</td></tr>
+            <tr><td>Solução com processamento local e armazenamento histórico.</td><td>Um sistema que depende exclusivamente de inspeções manuais.</td><td>Filtra e valida as leituras antes da análise.</td><td>Considera qualquer alteração isolada como uma falha confirmada.</td></tr>
+            <tr><td>Base para evolução futura com análise avançada.</td><td>Um modelo de Machine Learning já validado para prever todas as falhas.</td><td>Gera informações para apoiar a priorização de investigações.</td><td>Substitui a experiência dos profissionais responsáveis pelo equipamento.</td></tr>
+            <tr><td>Projeto com foco inicial em uma máquina Pick-and-Place.</td><td>Uma plataforma já preparada para monitorar dezenas de máquinas simultaneamente.</td><td>Permite comparar o comportamento atual com uma linha de referência.</td><td>Afirma que uma única medição é suficiente para determinar a condição da máquina.</td></tr>
+        </table>
+
+        <h3>4.2 — Personas</h3>
+        <p class="persona-intro">As três personas representam diferentes níveis de interação com o monitoramento: resposta operacional imediata, diagnóstico técnico contínuo e tomada de decisão gerencial baseada em dados.</p>
+
+        <div class="persona-card">
+            <div>
+                <img class="persona-photo" src="images/Marcos.png" alt="Persona Marcos, Operador de Máquina">
+                <div class="persona-quote"><strong>Objetivo:</strong> “Saber rapidamente se existe um risco real antes que a máquina pare.”</div>
+            </div>
+            <div>
+                <div class="persona-name">Marcos</div>
+                <div class="persona-role">Operador de Máquina</div>
+                <div class="persona-meta">30 anos • 6 anos na empresa Flex • Interação reativa, pontual e manual</div>
+                <div class="persona-grid">
+                    <div class="persona-block"><strong>Dores</strong><ul><li>Descobrir falhas graves em máquinas apenas quando o sistema já parou de funcionar.</li><li> Não existem notificações ou alertas fáceis para avisar sobre aquecimentos e vibrações anormais antes que ocorra a quebra total.</li><li>Dificuldade em rastrear a causa raiz de um defeito por falta de registros anteriores de telemetria.</li></ul></div>
+                    <div class="persona-block"><strong>Interações</strong><ul><li>Totalmente reativa, pontual e manual. Só intervém quando a máquina para de funcionar de vez ou quando percebe um ruído/vibração atípica por intuição.</li><li>Baixa prevenção e alta emergência (chamados de urgência quando a máquina quebra).</li><li>Dashboard web/computador para análise detalhada de sinais (RMS, Pico, FFT e gráficos de aceleração X/Y/Z).</li></ul></div>
+                    <div class="persona-block"><strong>Desejos</strong><ul><li>Antecipar quebras antes que elas ocorram, atuando preventivamente.</li><li>Reduzir o estresse de emergências e plantões fora de hora.</li><li> Garantir que a equipe técnica seja vista como um pilar de eficiência da fábrica.</li></ul></div>
+                    <div class="persona-block"><strong>Necessidades</strong><ul><li>Saber rapidamente se os níveis de temperatura e vibração estão na zona segura sem precisar interpretar gráficos.</li><li>Receber avisos apenas quando houver alterações reais capturadas pelos sensores (MPU6050 e DS18B20), sem falsos alarmes gerados por interferência do ambiente.</li><li>Saber o momento exato de avisar a equipe técnica para verificar o ativo antes do colapso do equipamento.</li></ul></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="persona-card">
+            <div>
+                <img class="persona-photo" src="images/Cintia.png" alt="Persona Cíntia, Gestora e Supervisora de Operações">
+                <div class="persona-quote"><strong>Objetivo:</strong> “Transformar a condição das máquinas em evidências para decisões e investimentos.”</div>
+            </div>
+            <div>
+                <div class="persona-name">Cíntia</div>
+                <div class="persona-role">Gestora / Supervisora de Operações</div>
+                <div class="persona-meta">23 anos • 3 anos na empresa Flex • Interação estratégica e assíncrona</div>
+                <div class="persona-grid">
+                    <div class="persona-block"><strong>Dores</strong><ul><li>Não ter métricas consolidadas sobre o nível de degradação do maquinário Pick-and-Place.</li><li>Prejuízos operacionais elevados provocados pela quebra inesperada de equipamentos cruciais da linha.</li><li>Falta de evidências concretas para justificar verbas para manutenção corretiva/preventiva junto à diretoria.</li></ul></div>
+                    <div class="persona-block"><strong>Interações</strong><ul><li>Estratégica e assíncrona.</li><li>Semanal e mensal para consolidação de relatórios e análises de disponibilidade.</li><li>Dashboard corporativo em notebook/browser com visão panorâmica do parque industrial.</li></ul></div>
+                    <div class="persona-block"><strong>Desejos</strong><ul><li>Manter a linha de produção rodando com a maior taxa de aproveitamento possível.</li><li>Substituir estimativas informais por métricas reais da fábrica.</li><li>Consolidar a fábrica em um modelo de Indústria 4.0 guiado por telemetria de sensores.</li></ul></div>
+                    <div class="persona-block"><strong>Necessidades</strong><ul><li>Centralização de indicadores de condição de vibração e temperatura dos ativos em uma única interface.</li><li>Registros históricos organizados para auditorias e planejamento financeiro da operação.</li><li>Uma arquitetura IoT (ESP32 + sensores) escalável para modernização da planta sem custos proibitivos.</li></ul></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="persona-card">
+            <div>
+                <img class="persona-photo" src="images/Matheus.png" alt="Persona Matheus, Técnico de Confiabilidade">
+                <div class="persona-quote"><strong>Objetivo:</strong> “Receber evidências suficientes para investigar a anomalia antes que ela evolua para uma parada.”</div>
+            </div>
+            <div>
+                <div class="persona-name">Matheus</div>
+                <div class="persona-role">Técnico de Confiabilidade</div>
+                <div class="persona-meta">28 anos • 5 anos na empresa Flex • Interação técnica, analítica e contínua</div>
+                <div class="persona-grid">
+                    <div class="persona-block"><strong>Dores</strong><ul><li>A medição pontual e manual não registra a evolução contínua da vibração ao longo do tempo, tornando invisíveis as falhas silenciosas.</li><li>Perder horas descobrindo se a anomalia é um desgaste mecânico, folga, desalinhamento ou apenas ruído elétrico do sensor.</li><li>Ter que aguardar a máquina quebrar ou o operador reclamar para só então descobrir que havia uma complicação térmica ou vibratória.</li></ul></div>
+                    <div class="persona-block"><strong>Interações</strong><ul><li>Técnica, analítica e contínua.</li><li>Diária (monitorando tendências) e sob demanda (ao receber alertas de anomalia).</li><li>Dashboard web/PC para análise aprofundada de gráficos de aceleração, RMS, valores de pico e decomposição por frequência (FFT).</li></ul></div>
+                    <div class="persona-block"><strong>Desejos</strong><ul><li>Saber exatamente qual eixo ou componente está falhando com base em dados concretos de telemetria.</li><li>Atuar de forma proativa com base em dados concretos.</li><li>Reduzir chamados fora de hora através de intervenções totalmente planejadas.</li></ul></div>
+                    <div class="persona-block"><strong>Necessidades</strong><ul><li>Comparar os dados atuais do sensor com o padrão histórico de operação normal da máquina.</li><li>Dados pré-processados e validados pelo ESP32 para garantir que os alertas venham de desvios reais e não de ruído elétrico/mecânico.</li><li>Gráficos de variabilidade (eixos X/Y/Z) e cálculos de RMS, Pico e FFT processados para apontar o padrão da anomalia.</li></ul></div>
+                </div>
+            </div>
+        </div>
+
+        <h3>4.3 — Jornada operacional</h3>
+        <p class="persona-intro">A jornada abaixo representa o fluxo comum entre operação, análise técnica e decisão gerencial.</p>
+
+        <div class="journey">
+            <div class="journey-head"><div class="journey-title">Jornada operacional integrada</div><div class="journey-context">Participação contínua da operação, manutenção e gestão</div></div>
+            <div class="journey-flow">
+                <div class="journey-step"><b>1. Operação</b><span>A máquina trabalha e os sensores registram vibração e temperatura.</span></div>
+                <div class="journey-step"><b>2. Tratamento</b><span>O ESP32 filtra, valida e envia os dados para a plataforma.</span></div>
+                <div class="journey-step"><b>3. Detecção</b><span>O sistema compara as leituras com o comportamento de referência.</span></div>
+                <div class="journey-step"><b>4. Investigação</b><span>O técnico analisa o alerta e confirma se existe desvio relevante.</span></div>
+                <div class="journey-step"><b>5. Decisão</b><span>A equipe define inspeção, manutenção ou acompanhamento do ativo.</span></div>
+            </div>
+            <div class="journey-outcome"><strong>Responsabilidades:</strong> o operador observa a condição, a manutenção investiga e a gestão prioriza recursos com base nos indicadores.</div>
+            <div class="journey-note"><strong>Observação:</strong> o alerta indica comportamento anormal e não representa diagnóstico definitivo de falha.</div>
+        </div>
+
+        <h2>5. Construção</h2>
+        <ol>
+            <li>Definir pontos de instalação dos sensores na Pick-and-Place.</li>
+            <li>Montar MPU6050 + DS18B20 + ESP32 e validar leituras.</li>
+            <li>Implementar pipeline de pré-processamento no ESP32.</li>
+            <li>Enviar leituras filtradas para o computador/servidor.</li>
+            <li>Criar processamento em Python para calcular indicadores.</li>
+            <li>Adicionar análise de frequência quando houver janela suficiente.</li>
+            <li>Implementar regra inicial de anomalia a partir dos dados de referência.</li>
+            <li>Criar dashboard e validar resultados com testes controlados.</li>
+        </ol>
+        
+        <div class="callout"><strong>ESTRATÉGIA</strong>
+            <br>Começar simples: primeiro provar que os sensores medem corretamente; depois provar que os dados chegam e são armazenados; só então adicionar análise de frequência e detecção de anomalias.
+        </div>
+        
+        <h2>6. Arquitetura proposta</h2>
+
+        <div class="arch-v3">
+                <p>Arquitetura em camadas: coleta local → comunicação segura → nuvem → processamento → armazenamento → análise → entrega de dados ao cliente.</p>
+                
+        <img class="logo-infra" src="images/Modelo Infraestrutura.png" alt="infraestrutura de nuvem AWS e Azure">
+
+        <h2>7. Matriz de Risco</h2>
+        <div class="risk-matrix">
+            <p class="risk-intro">
+                A matriz abaixo consolida os principais riscos técnicos, operacionais e de dados identificados
+                a partir do contexto do projeto. A classificação considera <strong>Probabilidade (P)</strong>,
+                <strong>Severidade (S)</strong> e <strong>Relevância (R)</strong>, todas em escala de 1 a 5. O grau
+                de risco é calculado pela combinação <strong>P × S × R</strong>. As ações propostas preservam o escopo do MVP e priorizam prevenção,
+                detecção e contingência.
+            </p>
+
+            <div class="risk-legend">
+                <div class="risk-legend-item"><strong>1–5</strong>Muito Baixo</div>
+                <div class="risk-legend-item"><strong>6–12</strong>Baixo</div>
+                <div class="risk-legend-item"><strong>13–30</strong>Moderado</div>
+                <div class="risk-legend-item"><strong>31–60</strong>Alto</div>
+                <div class="risk-legend-item"><strong>61–125</strong>Muito Alto</div>
+            </div>
+
+            <table class="risk-table">
+                <tr>
+                    <th>Sistema</th><th>Ativo</th><th>Vulnerabilidade</th><th>P</th><th>S</th><th>R</th>
+                    <th>Grau de Risco</th><th>Consequência</th><th>Controle / Ação</th>
+                </tr>
+                <tr>
+                    <td>IoT</td><td>Sensor</td><td>Fixação inadequada na máquina</td><td class="risk-score">3</td><td class="risk-score">4</td><td class="risk-score">3</td>
+                    <td class="risk-level risk-high"><strong>36</strong><span>Alto</span></td><td>Leituras inconsistentes e falsos desvios</td>
+                    <td>Definir ponto de instalação, fixação firme, inspeção periódica e testes repetidos de validação.</td>
+                </tr>
+                <tr>
+                    <td>Dados</td><td>Taxa de amostragem inadequada</td><td>Configuração incompatível com a análise de frequência</td><td class="risk-score">3</td><td class="risk-score">4</td><td class="risk-score">4</td>
+                    <td class="risk-level risk-high"><strong>48</strong><span>Alto</span></td><td>Frequências relevantes podem não ser observadas</td>
+                    <td>Definir taxa conforme o fenômeno monitorado e validar com testes controlados antes da análise FFT.</td>
+                </tr>
+                <tr>
+                    <td>Ambiente</td><td>Ruído / interferência de medição</td><td>Ruído elétrico ou mecânico no sinal</td><td class="risk-score">4</td><td class="risk-score">4</td><td class="risk-score">5</td>
+                    <td class="risk-level risk-critical"><strong>80</strong><span>Muito alto</span></td><td>Falsos alarmes e perda de confiança no sistema</td>
+                    <td>Filtragem e validação no ESP32, baseline, repetição de medições e proteção contra interferência eletromagnética.</td>
+                </tr>
+                <tr>
+                    <td>Internet</td><td>Wi-Fi instável</td><td>Oscilação ou indisponibilidade da rede</td><td class="risk-score">3</td><td class="risk-score">3</td><td class="risk-score">4</td>
+                    <td class="risk-level risk-high"><strong>36</strong><span>Alto</span></td><td>Perda ou atraso na transmissão das leituras</td>
+                    <td>Buffer local no edge, reenvio quando disponível e monitoramento da conectividade.</td>
+                </tr>
+                <tr>
+                    <td>Dados</td><td>Poucos dados históricos</td><td>Período insuficiente de coleta normal e alterada</td><td class="risk-score">4</td><td class="risk-score">5</td><td class="risk-score">4</td>
+                    <td class="risk-level risk-critical"><strong>80</strong><span>Muito alto</span></td><td>Baseline fraco e detecção de anomalias pouco confiável</td>
+                    <td>Coletar histórico suficiente em condições normais e em testes controlados antes de ampliar regras de anomalia.</td>
+                </tr>
+                <tr>
+                    <td>Dados</td><td>Interpretação incorreta do alerta</td><td>Tratar indicação de anomalia como diagnóstico definitivo</td><td class="risk-score">5</td><td class="risk-score">5</td><td class="risk-score">4</td>
+                    <td class="risk-level risk-critical"><strong>100</strong><span>Muito alto</span></td><td>Decisão de manutenção inadequada</td>
+                    <td>Deixar explícito que alertas são indícios; exigir investigação técnica e correlação com histórico, RMS, pico, FFT e temperatura.</td>
+                </tr>
+                <tr>
+                    <td>Ambiente</td><td>Temperatura excessiva / ambiente adverso</td><td>Condição ambiental fora da faixa esperada</td><td class="risk-score">2</td><td class="risk-score">4</td><td class="risk-score">3</td>
+                    <td class="risk-level risk-medium"><strong>24</strong><span>Moderado</span></td><td>Erro de leitura ou degradação do conjunto</td>
+                    <td>Monitorar condições do ambiente, proteger cabeamento e validar leituras durante a implantação.</td>
+                </tr>
+                <tr>
+                    <td>Hardware</td><td>Falha do ESP32 / alimentação</td><td>Perda de energia, travamento ou falha de hardware</td><td class="risk-score">3</td><td class="risk-score">4</td><td class="risk-score">5</td>
+                    <td class="risk-level risk-high"><strong>60</strong><span>Alto</span></td><td>Interrupção da aquisição e lacunas no histórico</td>
+                    <td>Validar alimentação, reinicialização controlada, registrar status do dispositivo e manter contingência local.</td>
+                </tr>
+                <tr>
+                    <td>Dados</td><td>Perda / corrupção de dados</td><td>Falha de transmissão, armazenamento ou processamento</td><td class="risk-score">5</td><td class="risk-score">5</td><td class="risk-score">5</td>
+                    <td class="risk-level risk-critical"><strong>125</strong><span>Muito alto</span></td><td>Histórico incompleto e análise comprometida</td>
+                    <td>Persistência RAW, validação de dados, buffer local, logs e rotina de backup/recuperação.</td>
+                </tr>
+                <tr>
+                    <td>Internet</td><td>Indisponibilidade do backend / nuvem</td><td>Falha de serviço ou infraestrutura</td><td class="risk-score">4</td><td class="risk-score">2</td><td class="risk-score">5</td>
+                    <td class="risk-level risk-high"><strong>40</strong><span>Alto</span></td><td>Dashboard e processamento indisponíveis</td>
+                    <td>Separação entre coleta e processamento, retenção local, monitoramento e arquitetura de contingência AWS/Azure prevista no projeto.</td>
+                </tr>
+                <tr>
+                    <td>Dados</td><td>Acesso indevido aos dados</td><td>Credenciais, permissões ou configuração de rede inad equadas</td><td class="risk-score">3</td><td class="risk-score">5</td><td class="risk-score">3</td>
+                    <td class="risk-level risk-high"><strong>45</strong><span>Alto</span></td><td>Exposição ou alteração indevida dos dados</td>
+                    <td>IAM/Entra ID, gerenciamento de segredos, TLS, firewall e auditoria conforme a camada de segurança proposta.</td>
+                </tr>
+                <tr>
+                    <td>Desenvolvimento</td><td>Escopo excessivo do MVP</td><td>Tentar antecipar múltiplas máquinas, ML ou integrações</td><td class="risk-score">4</td><td class="risk-score">3</td><td class="risk-score">3</td>
+                    <td class="risk-level risk-high"><strong>36</strong><span>Alto</span></td><td>Atraso na validação do núcleo do produto</td>
+                    <td>Manter foco em uma máquina, dois sensores e pipeline coleta → análise → visualização; evoluir por fases.</td>
+                </tr>
+            </table>
+
+        </div>
+
+        <h2>8. Conclusão</h2>
+
+            <p>O desenvolvimento deste projeto demonstra como conceitos de Internet das Coisas, Computação em Nuvem e Transformação Digital podem ser aplicados ao monitoramento de ativos industriais críticos. A utilização dos sensores MPU6050 e DS18B20, integrados ao ESP32, permite criar uma infraestrutura capaz de registrar continuamente informações de vibração e temperatura de uma máquina Pick-and-Place.</p>
+
+            <p>A análise do caso da Flex evidencia que organizações industriais de alta maturidade já utilizam estratégias semelhantes para aumentar a disponibilidade dos equipamentos e reduzir riscos operacionais. A adoção de sensores, plataformas de análise de dados e manutenção preditiva tornou-se um elemento fundamental das iniciativas de Indústria 4.0.</p>
+
+            <p>Os relatos dos gestores da Flex reforçam que os dados passaram a ser um ativo estratégico para a tomada de decisão. O valor não está apenas na coleta das informações, mas na capacidade de transformá-las em conhecimento operacional capaz de apoiar manutenção, engenharia e gestão.</p>
+
+            <p>Nesse contexto, o projeto proposto representa um primeiro passo para a construção de uma arquitetura IoT escalável, alinhada às práticas utilizadas em ambientes industriais modernos. Embora o MVP tenha foco em uma única máquina, os conceitos implementados podem servir de base para futuras evoluções envolvendo análise avançada, manutenção preditiva, inteligência artificial e Digital Twins.</p>
+    </div>
+
+<!-- Botão para baixar o projeto em PDF -->
+<div id="download-project" style="position:fixed;right:24px;bottom:24px;z-index:9999">
+    <button
+        id="download-project-btn"
+        type="button"
+        onclick="downloadProjectPDF()"
+        style="border:0;border-radius:8px;padding:12px 18px;background:#1E2942;color:#fff;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.18)"
+    >
+        Baixar PDF
+    </button>
+</div>
+
+<script>
+
+function downloadProjectPDF() {
+    const printWindow = window.open('', '_blank', 'width=1200,height=900');
+    if (!printWindow) {
+        alert('Permita janelas pop-up para gerar o PDF.');
+        return;
+    }
+
+    const pageWidth = 1000;
+    const pageMargin = 30;
+    const documentWidth = pageWidth + (pageMargin * 2);
+
+    printWindow.document.open();
+    printWindow.document.write('<!DOCTYPE html>' + document.documentElement.outerHTML);
+    printWindow.document.close();
+    printWindow.document.title = 'Monitoramento de Vibração em Máquinas — Pick and Place';
+
+    printWindow.addEventListener('load', function preparePrint() {
+        const printButton = printWindow.document.getElementById('download-project');
+        if (printButton) printButton.remove();
+
+        const printStyle = printWindow.document.createElement('style');
+        const pages = printWindow.document.querySelectorAll('.page');
+        const lastPage = pages[pages.length - 1];
+
+        printStyle.textContent = `
+            *, *::before, *::after {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            html, body {
+                width: ${documentWidth}px !important;
+                min-width: ${documentWidth}px !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: hidden !important;
+                background: #D4D7D8 !important;
+            }
+            .page {
+                width: ${pageWidth}px !important;
+                max-width: ${pageWidth}px !important;
+                min-width: ${pageWidth}px !important;
+                margin: ${pageMargin}px auto !important;
+                break-before: auto !important;
+                break-after: auto !important;
+                break-inside: auto !important;
+                page-break-before: auto !important;
+                page-break-after: auto !important;
+                page-break-inside: auto !important;
+            }
+            .page:last-of-type { margin-bottom: 0 !important; }
+            .persona-card { grid-template-columns: 180px 1fr !important; }
+            .persona-grid { grid-template-columns: 1fr 1fr !important; }
+            .persona-photo { height: 210px !important; }
+            .journey-flow { grid-template-columns: repeat(5, 1fr) !important; }
+            .journey-head { display: flex !important; }
+            .journey-context { text-align: right !important; }
+            .arch-v3 .grid-3 { grid-template-columns: repeat(3, 1fr) !important; }
+            .arch-v3 .grid-4 { grid-template-columns: repeat(4, 1fr) !important; }
+            .arch-v3 .grid-5 { grid-template-columns: repeat(5, 1fr) !important; }
+            .arch-v3 .service-grid,
+            .arch-v3 .two-clouds { grid-template-columns: 1fr 1fr !important; }
+            .arch-v3 .security-strip,
+            .arch-v3 .business-output { grid-template-columns: repeat(5, 1fr) !important; }
+            .arch-v3 .flow-row { grid-template-columns: 1fr 42px 1fr !important; }
+        `;
+        printWindow.document.head.appendChild(printStyle);
+        printWindow.document.body.offsetHeight;
+
+        lastPage.style.marginBottom = '0';
+        const documentHeight = Math.ceil(lastPage.offsetTop + lastPage.offsetHeight);
+        printStyle.textContent = `
+            @page { size: ${documentWidth}px ${documentHeight}px; margin: 0; }
+            html, body {
+                height: ${documentHeight}px !important;
+                max-height: ${documentHeight}px !important;
+                overflow: hidden !important;
+            }
+        ` + printStyle.textContent;
+        printWindow.focus();
+        printWindow.addEventListener('afterprint', function closePrintWindow() {
+            printWindow.close();
+        }, { once: true });
+        printWindow.print();
+    }, { once: true });
+}
+</script>
+
+</body>
+</html>

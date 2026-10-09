@@ -1,0 +1,937 @@
+    <!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Monitoramento em Pick-and-Place</title>
+
+<style>
+:root{--navy:#1E2942;--blue:#5FAAB5;--gray:#5B6166}
+*{box-sizing:border-box}
+body{margin:0;background:#D4D7D8;color:var(--navy);font-family:Arial,Helvetica,sans-serif;line-height:1.55}
+.page{max-width:1000px;margin:30px auto;background:white;padding:50px 64px;box-shadow:0 6px 30px rgba(0,0,0,.10)}
+.cover{min-height:780px;border-top:0;display:flex;flex-direction:column;justify-content:center;text-align:center}
+h1{font-size:40px;line-height:1.08;color:var(--navy);margin:10px 0}
+h2{font-size:20px;color:var(--navy);border-bottom:3px solid var(--blue);padding-bottom:5px;margin-top:38px}
+h3{font-size:17px;color:var(--blue);margin-top:25px}
+.subtitle{font-size:17px;color:var(--gray)}
+.callout{padding:15px 15px;background:#e4edef;border-left:5px solid var(--blue);border-radius:6px;margin:20px 0}
+table{width:100%;border-collapse:collapse;margin:15px 0 20px;font-size:12px}
+th{background:var(--navy);color:#fff;text-align:left;padding:10px}
+td{border:1px solid #D4D7D8;padding:7px;vertical-align:center}
+tr:nth-child(even) td{background:#F7F7F7}
+li{margin:5px 0}
+.meta{margin-top:30px;color:var(--gray);font-size:12px}
+.personas-journeys h3{font-size:22px;margin:0 0 14px}
+.personas-journeys h4{color:var(--navy);font-size:17px;margin:0 0 8px}
+.persona-intro{font-size:13px;color:var(--gray);margin-bottom:18px}
+.persona-card{display:grid;grid-template-columns:180px 1fr;gap:20px;border:1px solid #D4D7D8;border-radius:14px;padding:18px;margin:18px 0;background:#fff;break-inside:avoid}
+.persona-photo{width:100%;height:210px;object-fit:cover;border-radius:10px;background:#E4EDEF;border:1px solid #D4D7D8}
+.persona-name{font-size:22px;color:var(--navy);font-weight:700;line-height:1.1}
+.persona-role{font-size:14px;color:var(--blue);font-weight:700;margin:4px 0 10px}
+.persona-meta{font-size:11px;color:var(--gray);margin-bottom:12px}
+.persona-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.persona-block{padding:11px;background:#F7F7F7;border-left:4px solid var(--blue);border-radius:6px}
+.persona-block strong{display:block;color:var(--navy);font-size:12px;margin-bottom:4px}
+.persona-block ul{margin:0;padding-left:16px;font-size:10.5px;line-height:1.4}
+.persona-quote{grid-column:1/-1;padding:11px 13px;background:#E4EDEF;border-radius:7px;font-size:11px}
+.journey{border:1px solid #D4D7D8;border-radius:12px;padding:16px;margin:16px 0;break-inside:avoid}
+.journey-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;border-bottom:2px solid var(--blue);padding-bottom:9px;margin-bottom:12px}
+.journey-title{font-size:18px;font-weight:700;color:var(--navy)}
+.journey-context{font-size:10.5px;color:var(--gray);text-align:right}
+.journey-flow{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:12px 0}
+.journey-step{border:1px solid #C8CDD0;border-radius:8px;padding:9px 7px;font-size:10px;min-height:88px;background:#fff}
+.journey-step b{display:block;color:var(--navy);font-size:10.5px;margin-bottom:4px}
+.journey-step span{display:block;color:var(--gray)}
+.journey-outcome{font-size:11px;background:#F3F7F8;border-left:4px solid var(--blue);padding:9px 11px;border-radius:5px}
+.journey-outcome strong{color:var(--navy)}
+.journey-note{font-size:10.5px;color:var(--gray);margin-top:8px}
+@media(max-width:800px){.persona-card{grid-template-columns:1fr}.persona-photo{max-width:180px}.persona-grid{grid-template-columns:1fr}.journey-flow{grid-template-columns:1fr}.journey-context{text-align:left}.journey-head{display:block}}
+@media(max-width:800px){.page{margin:0;padding:25px 20px;box-shadow:none}h1{font-size:30px}table{font-size:12px;display:block;overflow-x:auto}.cover{min-height:700px}}
+.logo-empresa{
+    width:420px;
+    max-width:80%;
+    height:auto;
+    margin:0 auto 20px;
+    display:block;
+}
+.integrantes{
+    margin:28px auto 0;
+    padding:18px 24px;
+    max-width:680px;
+    border-top:2px solid #D4D7D8;
+    color:#5B6166;
+    font-size:14px;
+    line-height:1.8;
+}
+.integrantes strong{
+    display:block;
+    color:#1E2942;
+    font-size:15px;
+    margin-bottom:6px;
+}
+.integrantes span{
+    display:block;
+}    
+ 
+/* ===== Arquitetura robusta v3 ===== */
+.arch-v3{
+    margin-top:22px;
+    color:var(--navy);
+}
+.arch-v3 .legend{
+    text-align:center;
+    font-size:11px;
+    color:var(--gray);
+    margin-bottom:14px;
+}
+.arch-v3 .layer{
+    border:2px solid #D4D7D8;
+    border-radius:14px;
+    padding:16px;
+    margin:14px 0;
+    background:#FAFAFA;
+}
+.arch-v3 .layer-title{
+    text-align:center;
+    font-weight:bold;
+    color:var(--navy);
+    letter-spacing:.8px;
+    margin-bottom:12px;
+    font-size:14px;
+}
+.arch-v3 .layer-subtitle{
+    text-align:center;
+    font-size:11px;
+    color:var(--gray);
+    margin-top:-7px;
+    margin-bottom:12px;
+}
+.arch-v3 .grid{
+    display:grid;
+    gap:12px;
+}
+.arch-v3 .grid-3{grid-template-columns:repeat(3,1fr)}
+.arch-v3 .grid-4{grid-template-columns:repeat(4,1fr)}
+.arch-v3 .grid-5{grid-template-columns:repeat(5,1fr)}
+.arch-v3 .node{
+    background:#fff;
+    border:1px solid #C8CDD0;
+    border-radius:10px;
+    padding:11px 8px;
+    text-align:center;
+    min-height:72px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    box-shadow:0 2px 7px rgba(0,0,0,.08);
+}
+
+.arch-v3 .node strong{font-size:12px;color:var(--navy)}
+.arch-v3 .node span{font-size:10px;color:var(--gray);margin-top:3px}
+.arch-v3 .node.primary{border:2px solid var(--blue)}
+.arch-v3 .node.cloud{background:#F3F7F8;border-color:var(--blue)}
+.arch-v3 .node.security{background:#F7F7F7}
+.arch-v3 .node.company{background:#E4EDEF;border:2px solid var(--navy)}
+.arch-v3 .arrow{
+    text-align:center;
+    color:var(--blue);
+    font-weight:bold;
+    font-size:22px;
+    line-height:1;
+    margin:4px 0;
+}
+.arch-v3 .flow-row{
+    display:grid;
+    grid-template-columns:1fr 42px 1fr;
+    gap:10px;
+    align-items:center;
+}
+.arch-v3 .flow-row .arrow{margin:0}
+.arch-v3 .cloud-title{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:8px;
+    margin-bottom:10px;
+}
+.arch-v3 .cloud-title strong{
+    color:var(--navy);
+    font-size:16px;
+}
+.arch-v3 .cloud-title small{
+    font-size:10px;
+    color:var(--gray);
+}
+.arch-v3 .cloud-box{
+    border:2px solid var(--blue);
+    border-radius:12px;
+    padding:13px;
+    background:#fff;
+}
+.arch-v3 .cloud-box.azure{
+    border-color:var(--navy);
+}
+.arch-v3 .service-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:9px;
+}
+.arch-v3 .service{
+    border:1px solid #D4D7D8;
+    border-radius:8px;
+    padding:8px 6px;
+    text-align:center;
+    background:#F7F7F7;
+}
+.arch-v3 .service strong{display:block;font-size:10px;color:var(--navy)}
+.arch-v3 .service span{font-size:9px;color:var(--gray)}
+.arch-v3 .two-clouds{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+}
+.arch-v3 .security-strip{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:8px;
+}
+.arch-v3 .security-item{
+    border:1px solid #D4D7D8;
+    border-radius:8px;
+    background:#fff;
+    padding:8px 5px;
+    text-align:center;
+}
+.arch-v3 .security-item strong{display:block;font-size:10px;color:var(--navy)}
+.arch-v3 .security-item span{font-size:9px;color:var(--gray)}
+.arch-v3 .business-output{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:8px;
+}
+.arch-v3 .output{
+    background:#fff;
+    border:1px solid #C8CDD0;
+    border-radius:8px;
+    padding:9px 5px;
+    text-align:center;
+    font-size:10px;
+    font-weight:bold;
+    color:var(--navy);
+}
+.arch-v3 .note{
+    margin-top:14px;
+    padding:11px 13px;
+    background:#E4EDEF;
+    border-left:4px solid var(--blue);
+    border-radius:6px;
+    font-size:11px;
+}
+.arch-v3 .mini-flow{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:7px;
+    flex-wrap:wrap;
+}
+.arch-v3 .mini-flow .mini{
+    background:#fff;
+    border:1px solid #C8CDD0;
+    border-radius:7px;
+    padding:7px 9px;
+    text-align:center;
+    font-size:10px;
+    color:var(--navy);
+}
+.arch-v3 .mini-flow .arr{color:var(--blue);font-weight:bold}
+
+@media(max-width:800px){
+    .arch-v3 .grid-3,.arch-v3 .grid-4,.arch-v3 .grid-5,
+    .arch-v3 .service-grid,.arch-v3 .security-strip,.arch-v3 .business-output,
+    .arch-v3 .two-clouds{grid-template-columns:1fr 1fr}
+    .arch-v3 .flow-row{grid-template-columns:1fr}
+    .arch-v3 .flow-row .arrow{transform:rotate(90deg)}
+}
+
+.risk-matrix{margin-top:22px}
+.risk-intro{font-size:12px;color:var(--gray);margin-bottom:14px}
+.risk-legend{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin:12px 0 18px}
+.risk-legend-item{border:1px solid #D4D7D8;border-radius:7px;padding:8px 5px;text-align:center;font-size:10px;background:#fff}
+.risk-legend-item strong{display:block;color:var(--navy);font-size:11px}
+.risk-table{font-size:10px}
+.risk-table th{font-size:10px;padding:5px}
+.risk-table td{padding:5px}
+.risk-level{font-weight:700;text-align:center;white-space:nowrap}
+.risk-low{background:#D9EAD3!important}
+.risk-medium{background:#FFF2CC!important}
+.risk-high{background:#FCE4D6!important}
+.risk-critical{background:#EA9999!important;color:#000;font-weight:700}
+.risk-score{font-weight:700;text-align:center;text-align:center}
+.risk-matrix-box{border:1px solid #D4D7D8;border-radius:10px;padding:13px;margin:16px 0;background:#FAFAFA}
+.risk-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;max-width:650px;margin:12px auto}
+.risk-grid div{border:1px solid #C8CDD0;border-radius:5px;padding:7px 3px;text-align:center;font-size:9px;background:#fff}
+.risk-grid .axis{background:#E4EDEF;font-weight:700;color:var(--navy)}
+.risk-grid .r-low{background:#E8F1E8}
+.risk-grid .r-med{background:#FFF4D6}
+.risk-grid .r-high{background:#FCE8D8}
+.risk-grid .r-crit{background:#F6D8D8}
+@media(max-width:800px){
+  .risk-legend{grid-template-columns:1fr 1fr}
+  .risk-table{display:table;width:100%;align-items:center;overflow:visible}
+  .risk-grid{grid-template-columns:repeat(5,1fr);overflow-x:auto}
+}
+
+.logo-infra{
+    width:870px;
+    max-width:100%;
+    height:auto;
+    margin:40px auto 20px;
+    display:block;
+}
+
+@page { size: auto; margin: 0}
+</style>
+
+
+</head>
+<body>
+
+    <div class="page cover">
+        <img class="logo-empresa"
+            src="C:\Users\etmca\OneDrive\Área de Trabalho\Pesquisa e Inovação III\images\vibra-data-logo.png"
+            alt="Vibra Data — Monitoramento de Vibração em Máquinas">
+
+            <h1>Monitoramento em Pick-and-Place</h1>
+            <p class="subtitle">Lean Inception + Arquitetura + Implementação + Implantação</p>
+            
+            <div class="integrantes">
+                <strong>INTEGRANTES</strong>
+                <span>AARON CUTIPA CANAVIRI</span>
+                <span>DIOGO YUDI DUARTE TATENO</span>
+                <span>GUILHERME ORTIZ DE CAMARGO</span>
+                <span>MATHEUS NOCELLI MORIGUTI</span>
+                <span>VINÍCIUS DIAS DA SILVA</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="page">
+        <h2>1. Contexto de negócio</h2>
+            <p>Máquinas industriais como sistemas <strong>Pick-and-Place</strong> trabalham com movimentos repetitivos e ciclos contínuos. Com o uso, componentes mecânicos podem apresentar <strong>desbalanceamento, desalinhamento, folgas, desgaste de rolamentos, problemas de lubrificação e outras degradações</strong>. Essas condições podem alterar o padrão de vibração e temperatura do equipamento antes de uma falha mais grave.</p>
+
+            <p>O principal problema de negócio é que uma alteração pode evoluir sem ser percebida até provocar uma <strong>parada não planejada</strong>. Nesse cenário, o impacto não se limita ao reparo: a empresa pode enfrentar perda de produção, atraso de pedidos, desperdício de matéria-prima, horas de manutenção emergencial e redução da disponibilidade do equipamento.</p>
+
+            <p>Estratégias de manutenção preditiva podem proporcionar, em determinadas aplicações, <strong>redução de 25% a 30% nos custos de manutenção</strong>, <strong>redução de 70% a 75% nas falhas</strong> e <strong>redução de 35% a 45% no tempo de parada</strong>. Esses valores não representam uma garantia para esta máquina específica, mas demonstram o potencial de negócio associado à identificação antecipada de problemas.</p>
+
+            <table>
+                <tr><th>Indicador de referência</th><th>Resultado potencial da manutenção preditiva</th></tr>
+                <tr><td>Custos de manutenção</td><td><strong>25%–30% de redução</strong></td></tr>
+                <tr><td>Falhas</td><td><strong>70%–75% de redução</strong></td></tr>
+                <tr><td>Tempo de parada</td><td><strong>35%–45% de redução</strong></td></tr>
+            </table>
+
+        <h3>1.1 — Dificuldade do negócio</h3>
+            A empresa precisa reduzir o risco de descobrir alterações no comportamento da máquina somente após a ocorrência de uma falha ou durante uma inspeção pontual. O desafio é obter evidências do comportamento do equipamento ao longo do tempo para que a manutenção consiga investigar desvios antes que eles evoluam para uma parada não planejada.
+    
+        <h3>1.2 — Por que esse problema é relevante?</h3>
+            <ul>
+                <li><strong>Paradas não planejadas:</strong> interrompem a produção e podem comprometer prazos.</li>
+                <li><strong>Manutenção emergencial:</strong> tende a exigir resposta rápida, mão de obra e peças fora do planejamento.</li>
+                <li><strong>Perda de produtividade:</strong> uma máquina indisponível reduz a capacidade produtiva do processo.</li>
+                <li><strong>Falhas progressivas:</strong> pequenas alterações mecânicas podem evoluir se não forem investigadas.</li>
+                <li><strong>Inspeções pontuais:</strong> mostram a condição em um momento específico e podem não registrar a evolução do problema.</li>
+                <li><strong>Falta de histórico:</strong> dificulta estabelecer uma referência do comportamento normal e identificar tendências.</li>
+            </ul>
+
+        <h3>1.3 — Principais causas que podem alterar o comportamento da máquina</h3>
+            <ul>
+                <li>Desbalanceamento de componentes rotativos.</li>
+                <li>Desalinhamento de eixos e componentes.</li>
+                <li>Desgaste ou dano em rolamentos.</li>
+                <li>Folgas mecânicas e fixações inadequadas.</li>
+                <li>Lubrificação inadequada.</li>
+                <li>Aquecimento anormal de componentes.</li>
+            </ul>
+
+        <h3>1.4 — Necessidade do negócio</h3>
+            Antes de apresentar qualquer tecnologia, existe uma necessidade clara: <strong>acompanhar a condição da máquina de forma contínua, construir um histórico e identificar desvios que justifiquem uma investigação de manutenção</strong>.
+
+        <h2>2. Obstáculos a serem detectados</h2>
+        <ul>
+            <li>Vibrações anormais associadas a desgaste, desalinhamento, folga ou desbalanceamento.</li>
+            <li>Aumento de temperatura que possa indicar alteração no comportamento do equipamento.</li>
+            <li>Fixação inadequada do sensor, gerando leituras inconsistentes.</li>
+            <li>Ruído de medição que pode produzir falsos alarmes.</li>
+            <li>Ausência de histórico suficiente para definir um comportamento de referência.</li>
+            <li>Perda de dados durante a transmissão.</li>
+        </ul>
+
+        <h2>3. Visão da solução</h2>
+        <table>
+            <tr><th>Etapa</th><th>O que acontece</th><th>Resultado</th></tr>
+            <tr><td>1. Sensoriamento</td><td>MPU6050 mede vibração; DS18B20 mede temperatura.</td><td>Dados brutos X/Y/Z e °C.</td></tr>
+            <tr><td>3. Pré-processamento</td><td>ESP32 Filtra, valida e converte dados com leituras periódicas.</td><td>Informações confiáveis.</td></tr>
+            <tr><td>4. Transmissão</td><td>Dados relevantes enviados via Wi-Fi.</td><td>Redução de tráfego e ruído.</td></tr>
+            <tr><td>5. Armazenamento</td><td>Servidor registra histórico.</td><td>Base de dados organizada.</td></tr>
+            <tr><td>6. Visualização</td><td>Dashboard apresenta gráficos e alertas.</td><td>Apoio à decisão.</td></tr>
+        </table>
+    
+        <h2>4. Lean Inception</h2>
+        <h3>4.1 — Visão do produto</h3>
+        Criar um sistema de monitoramento para máquinas Pick-and-Place que colete vibração e temperatura, filtre ruídos e apresente informações confiáveis para manutenção.
+                
+        <h3>4.2 — MVP</h3>
+        O projeto deve demonstrar que é possível <strong>medir, registrar, analisar e visualizar</strong> o comportamento de uma máquina Pick-and-Place, criando uma base confiável para identificar desvios e apoiar a manutenção. Os alertas representam <strong>indícios que precisam ser investigados</strong>, e não diagnósticos definitivos.
+
+        <h3>4.3 — O produto é / não é / faz / não faz</h3>
+        <table>
+            <tr><th>É</th><th>Não é</th><th>Faz</th><th>Não faz</th></tr>
+            <tr><td>Sistema IoT para monitoramento de condição.</td><td>Substituto da equipe ou da manutenção especializada.</td><td>Coleta dados de vibração e temperatura continuamente.</td><td>Conserta automaticamente a máquina.</td></tr>
+            <tr><td>Sistema de monitoramento aplicado à máquina Pick-and-Place.</td><td>Sistema industrial certificado para qualquer ambiente ou equipamento.</td><td>Registra e organiza um histórico das medições.</td><td>Garante que uma falha ocorrerá ou não ocorrerá.</td></tr>
+            <tr><td>Ferramenta de apoio à decisão da manutenção.</td><td>Instrumento de segurança funcional ou sistema de proteção da máquina.</td><td>Identifica mudanças e desvios em relação ao comportamento de referência.</td><td>Substitui inspeções, diagnósticos ou decisões de técnicos especializados.</td></tr>
+            <tr><td>Solução de aquisição e análise de dados.</td><td>Um sistema universal para qualquer tipo de máquina.</td><td>Calcula indicadores como RMS, picos, tendência e temperatura.</td><td>Promete diagnosticar definitivamente a causa de uma falha.</td></tr>
+            <tr><td>Protótipo de manutenção orientada por dados.</td><td>Uma solução pronta para produção em escala industrial.</td><td>Permite acompanhar a evolução do comportamento do equipamento.</td><td>Elimina completamente a necessidade de manutenção preventiva.</td></tr>
+            <tr><td>Solução com processamento local e armazenamento histórico.</td><td>Um sistema que depende exclusivamente de inspeções manuais.</td><td>Filtra e valida as leituras antes da análise.</td><td>Considera qualquer alteração isolada como uma falha confirmada.</td></tr>
+            <tr><td>Base para evolução futura com análise avançada.</td><td>Um modelo de Machine Learning já validado para prever todas as falhas.</td><td>Gera informações para apoiar a priorização de investigações.</td><td>Substitui a experiência dos profissionais responsáveis pelo equipamento.</td></tr>
+            <tr><td>Projeto com foco inicial em uma máquina Pick-and-Place.</td><td>Uma plataforma já preparada para monitorar dezenas de máquinas simultaneamente.</td><td>Permite comparar o comportamento atual com uma linha de referência.</td><td>Afirma que uma única medição é suficiente para determinar a condição da máquina.</td></tr>
+        </table>
+
+        <h3>4.4 — Personas</h3>
+        <p class="persona-intro">As três personas representam diferentes níveis de interação com o monitoramento: resposta operacional imediata, diagnóstico técnico contínuo e tomada de decisão gerencial baseada em dados.</p>
+
+        <div class="persona-card">
+            <div>
+                <img class="persona-photo" src="C:\Users\etmca\OneDrive\Área de Trabalho\Pesquisa e Inovação III\images\Personas Pick and Place (1).png" alt="Persona Marcos, Operador de Máquina">
+                <div class="persona-quote"><strong>Objetivo:</strong> “Saber rapidamente se existe um risco real antes que a máquina pare.”</div>
+            </div>
+            <div>
+                <div class="persona-name">Marcos</div>
+                <div class="persona-role">Operador de Máquina</div>
+                <div class="persona-meta">30 anos • 6 anos na empresa Motorola • Interação reativa, pontual e manual</div>
+                <div class="persona-grid">
+                    <div class="persona-block"><strong>Dores</strong><ul><li>Descobrir falhas graves em máquinas apenas quando o sistema já parou de funcionar.</li><li> Não existem notificações ou alertas fáceis para avisar sobre aquecimentos e vibrações anormais antes que ocorra a quebra total.</li><li>Dificuldade em rastrear a causa raiz de um defeito por falta de registros anteriores de telemetria.</li></ul></div>
+                    <div class="persona-block"><strong>Interações</strong><ul><li>Totalmente reativa, pontual e manual. Só intervém quando a máquina para de funcionar de vez ou quando percebe um ruído/vibração atípica por intuição.</li><li>Baixa prevenção e alta emergência (chamados de urgência quando a máquina quebra).</li><li>Dashboard web/computador para análise detalhada de sinais (RMS, Pico, FFT e gráficos de aceleração X/Y/Z).</li></ul></div>
+                    <div class="persona-block"><strong>Desejos</strong><ul><li>Antecipar quebras antes que elas ocorram, atuando preventivamente.</li><li>Reduzir o estresse de emergências e plantões fora de hora.</li><li> Garantir que a equipe técnica seja vista como um pilar de eficiência da fábrica.</li></ul></div>
+                    <div class="persona-block"><strong>Necessidades</strong><ul><li>Saber rapidamente se os níveis de temperatura e vibração estão na zona segura sem precisar interpretar gráficos.</li><li>Receber avisos apenas quando houver alterações reais capturadas pelos sensores (MPU6050 e DS18B20), sem falsos alarmes gerados por interferência do ambiente.</li><li>Saber o momento exato de avisar a equipe técnica para verificar o ativo antes do colapso do equipamento.</li></ul></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="persona-card">
+            <div>
+                <img class="persona-photo" src="C:\Users\etmca\OneDrive\Área de Trabalho\Pesquisa e Inovação III\images\Personas Pick and Place.png" alt="Persona Cíntia, Gestora e Supervisora de Operações">
+                <div class="persona-quote"><strong>Objetivo:</strong> “Transformar a condição das máquinas em evidências para decisões e investimentos.”</div>
+            </div>
+            <div>
+                <div class="persona-name">Cíntia</div>
+                <div class="persona-role">Gestora / Supervisora de Operações</div>
+                <div class="persona-meta">23 anos • 3 anos na empresa Motorola • Interação estratégica e assíncrona</div>
+                <div class="persona-grid">
+                    <div class="persona-block"><strong>Dores</strong><ul><li>Não ter métricas consolidadas sobre o nível de degradação do maquinário Pick-and-Place.</li><li>Prejuízos operacionais elevados provocados pela quebra inesperada de equipamentos cruciais da linha.</li><li>Falta de evidências concretas para justificar verbas para manutenção corretiva/preventiva junto à diretoria.</li></ul></div>
+                    <div class="persona-block"><strong>Interações</strong><ul><li>Estratégica e assíncrona.</li><li>Semanal e mensal para consolidação de relatórios e análises de disponibilidade.</li><li>Dashboard corporativo em notebook/browser com visão panorâmica do parque industrial.</li></ul></div>
+                    <div class="persona-block"><strong>Desejos</strong><ul><li>Manter a linha de produção rodando com a maior taxa de aproveitamento possível.</li><li>Substituir estimativas informais por métricas reais da fábrica.</li><li>Consolidar a fábrica em um modelo de Indústria 4.0 guiado por telemetria de sensores.</li></ul></div>
+                    <div class="persona-block"><strong>Necessidades</strong><ul><li>Centralização de indicadores de condição de vibração e temperatura dos ativos em uma única interface.</li><li>Registros históricos organizados para auditorias e planejamento financeiro da operação.</li><li>Uma arquitetura IoT (ESP32 + sensores) escalável para modernização da planta sem custos proibitivos.</li></ul></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="persona-card">
+            <div>
+                <img class="persona-photo" src="C:\Users\etmca\OneDrive\Área de Trabalho\Pesquisa e Inovação III\images\Personas Pick and Place (2).png" alt="Persona Matheus, Técnico de Confiabilidade">
+                <div class="persona-quote"><strong>Objetivo:</strong> “Receber evidências suficientes para investigar a anomalia antes que ela evolua para uma parada.”</div>
+            </div>
+            <div>
+                <div class="persona-name">Matheus</div>
+                <div class="persona-role">Técnico de Confiabilidade</div>
+                <div class="persona-meta">28 anos • 3 anos na empresa Motorola • Interação técnica, analítica e contínua</div>
+                <div class="persona-grid">
+                    <div class="persona-block"><strong>Dores</strong><ul><li>A medição pontual e manual não registra a evolução contínua da vibração ao longo do tempo, tornando invisíveis as falhas silenciosas.</li><li>Perder horas descobrindo se a anomalia é um desgaste mecânico, folga, desalinhamento ou apenas ruído elétrico do sensor.</li><li>Ter que aguardar a máquina quebrar ou o operador reclamar para só então descobrir que havia um problema térmico ou vibratório.</li></ul></div>
+                    <div class="persona-block"><strong>Interações</strong><ul><li>Técnica, analítica e contínua.</li><li>Diária (monitorando tendências) e sob demanda (ao receber alertas de anomalia).</li><li>Dashboard web/PC para análise aprofundada de gráficos de aceleração, RMS, valores de pico e decomposição por frequência (FFT).</li></ul></div>
+                    <div class="persona-block"><strong>Desejos</strong><ul><li>Saber exatamente qual eixo ou componente está falhando com base em dados concretos de telemetria.</li><li>Atuar de forma proativa com base em dados concretos.</li><li>Reduzir chamados fora de hora através de intervenções totalmente planejadas.</li></ul></div>
+                    <div class="persona-block"><strong>Necessidades</strong><ul><li>Comparar os dados atuais do sensor com o padrão histórico de operação normal da máquina.</li><li>Dados pré-processados e validados pelo ESP32 para garantir que os alertas venham de desvios reais e não de ruído elétrico/mecânico.</li><li>Gráficos de variabilidade (eixos X/Y/Z) e cálculos de RMS, Pico e FFT processados para apontar o padrão da anomalia.</li></ul></div>
+                </div>
+            </div>
+        </div>
+
+        <h3 style="margin-top:28px">4.5 — Jornadas</h3>
+        <p class="persona-intro">As jornadas traduzem as necessidades de cada persona em interações com o sistema, conectando sensores, processamento, dashboard, alertas e decisões.</p>
+
+        <div class="journey">
+            <div class="journey-head"><div class="journey-title">Jornada 1 — Marcos, Operador de Máquina</div><div class="journey-context">Frequência: durante a operação e principalmente diante de desvios</div></div>
+            <div class="journey-flow">
+                <div class="journey-step"><b>1. Operação</b><span>Máquina Pick-and-Place trabalha normalmente.</span></div>
+                <div class="journey-step"><b>2. Monitoramento</b><span>MPU6050 e DS18B20 enviam leituras ao ESP32.</span></div>
+                <div class="journey-step"><b>3. Desvio real</b><span>O sistema filtra ruído e identifica alteração relevante.</span></div>
+                <div class="journey-step"><b>4. Alerta visual</b><span>Dashboard mostra zona de atenção sem exigir interpretação complexa.</span></div>
+                <div class="journey-step"><b>5. Ação</b><span>Matheus verifica o ativo e aciona a equipe técnica antes de uma possível parada.</span></div>
+            </div>
+            <div class="journey-outcome"><strong>Resultado:</strong> menos dependência da intuição e mais capacidade de agir preventivamente.</div>
+        </div>
+
+        <div class="journey">
+            <div class="journey-head"><div class="journey-title">Jornada 2 — Cíntia, Gestora / Supervisora</div><div class="journey-context">Frequência: semanal e mensal para acompanhamento e decisão</div></div>
+            <div class="journey-flow">
+                <div class="journey-step"><b>1. Acesso</b><span>Cíntia abre o dashboard corporativo pelo notebook/browser.</span></div>
+                <div class="journey-step"><b>2. Visão geral</b><span>Consulta condição dos ativos, alertas e disponibilidade.</span></div>
+                <div class="journey-step"><b>3. Tendências</b><span>Compara períodos e identifica degradações recorrentes.</span></div>
+                <div class="journey-step"><b>4. Evidências</b><span>Usa histórico e indicadores para justificar prioridades e investimentos.</span></div>
+                <div class="journey-step"><b>5. Decisão</b><span>Planeja ações de manutenção e acompanha o impacto na operação.</span></div>
+            </div>
+            <div class="journey-outcome"><strong>Resultado:</strong> decisões deixam de depender apenas de estimativas e passam a usar dados consolidados da operação.</div>
+        </div>
+
+        <div class="journey">
+            <div class="journey-head"><div class="journey-title">Jornada 3 — Marcos, Técnico de Confiabilidade</div><div class="journey-context">Frequência: diária e sob demanda ao receber alerta</div></div>
+            <div class="journey-flow">
+                <div class="journey-step"><b>1. Baseline</b><span>O histórico estabelece o comportamento normal da máquina.</span></div>
+                <div class="journey-step"><b>2. Alerta</b><span>Um desvio consistente de vibração ou temperatura é sinalizado.</span></div>
+                <div class="journey-step"><b>3. Diagnóstico</b><span>Analisa RMS, Pico, FFT, temperatura e eixos X/Y/Z.</span></div>
+                <div class="journey-step"><b>4. Investigação</b><span>Compara o evento com tendências anteriores e valida se há anomalia real.</span></div>
+                <div class="journey-step"><b>5. Intervenção</b><span>Planeja a inspeção ou manutenção antes da evolução para uma parada.</span></div>
+            </div>
+            <div class="journey-outcome"><strong>Resultado:</strong> investigação técnica baseada em telemetria contínua, histórico e processamento de sinais.</div>
+            <div class="journey-note"><strong>Observação:</strong> os alertas indicam comportamento anormal que deve ser investigado; não representam diagnóstico definitivo de falha.</div>
+        </div>
+
+        <h3>4.6 — Brainstorming de funcionalidades</h3>
+        <table>
+            <tr><th>Prioridade</th><th>Funcionalidade</th><th>MVP</th></tr>
+            <tr><td>Alta</td><td>Leitura MPU6050 (Vibração) e DS18B20 (Temperatura)</td><td>Sim</td></tr>
+            <tr><td>Alta</td><td>Pré-processamento no ESP32 (filtro, validação)</td><td>Sim</td></tr>
+            <tr><td>Alta</td><td>Transmissão via Wi-Fi e Armazenamento dos dados</td><td>Sim</td></tr>
+            <tr><td>Alta</td><td>Gráficos de vibração e temperatura + Dashboard web</td><td>Sim</td></tr>
+            <tr><td>Média</td><td>Análise de frequência/FFT</td><td>Sim, após coleta básica</td></tr>
+            <tr><td>Baixa</td><td>Integração com sistemas de comunicação + Notificação automática</td><td>Fase 2</td></tr>
+            <tr><td>Baixa</td><td>Múltiplas máquinas</td><td>Fase 2</td></tr>
+            <tr><td>Baixa</td><td>Modelo de machine learning</td><td>Fase 3</td></tr>
+        </table>
+
+        <h3>4.7 — O que não entra no MVP</h3>
+        <ul>
+            <li>Diagnóstico automático definitivo da causa da falha.</li>
+            <li>Predição de falha com machine learning antes de existir uma base histórica adequada.</li>
+            <li>Integração com sistemas industriais existentes.</li>
+            <li>Monitoramento simultâneo de dezenas de máquinas.</li>
+            <li>Certificação para uso em ambiente industrial crítico.</li>
+        </ul>
+        
+        <h2>5. Materiais necessários</h2>
+        <table>
+            <tr><th>Item</th><th>Quantidade inicial</th><th>Função</th><th>Observação</th></tr>
+            <tr><td>MPU6050</td><td>1</td><td>Medição de aceleração</td><td>Sensor principal do MVP.</td></tr>
+            <tr><td>DS18B20</td><td>1</td><td>Medição de temperatura</td><td>Complementa análise térmica.</td></tr>
+            <tr><td>ESP32</td><td>1</td><td>Processamento e Wi-Fi</td><td>Controlador recomendado.</td></tr>
+            <tr><td>Computador/servidor</td><td>1</td><td>Backend e análise</td><td>PC ou VM.</td></tr>
+            <tr><td>Máquina Pick-and-Place</td><td>1</td><td>Fonte real de vibração</td><td>Ambiente industrial.</td></tr>
+        </table>
+
+        <h2>6. Construção</h2>
+        <ol>
+            <li>Definir pontos de instalação dos sensores na Pick-and-Place.</li>
+            <li>Montar MPU6050 + DS18B20 + ESP32 e validar leituras.</li>
+            <li>Implementar pipeline de pré-processamento no ESP32.</li>
+            <li>Enviar leituras filtradas para o computador/servidor.</li>
+            <li>Criar processamento em Python para calcular indicadores.</li>
+            <li>Adicionar análise de frequência quando houver janela suficiente.</li>
+            <li>Implementar regra inicial de anomalia a partir dos dados de referência.</li>
+            <li>Criar dashboard e validar resultados com testes controlados.</li>
+        </ol>
+        
+        <div class="callout"><strong>ESTRATÉGIA</strong>
+            <br>Começar simples: primeiro provar que os sensores medem corretamente; depois provar que os dados chegam e são armazenados; só então adicionar análise de frequência e detecção de anomalias.
+        </div>
+        
+        <h2>7. Implantação</h2>
+        <table>
+            <tr><th>Ambiente</th><th>Implantação</th></tr>
+            <tr><td>Protótipo físico</td><td>MPU6050 e DS18B20 conectados ao ESP32 e fixados na máquina.</td></tr>
+            <tr><td>Rede</td><td>ESP32 conectado ao Wi-Fi disponível.</td></tr>
+            <tr><td>Servidor</td><td>Aplicação Python em computador local, VM ou servidor cloud.</td></tr>
+            <tr><td>Banco</td><td>SQLite para demonstração; PostgreSQL se houver necessidade de escala.</td></tr>
+            <tr><td>Dashboard</td><td>Aplicação web acessada pelo navegador.</td></tr>
+            <tr><td>Evolução</td><td>Docker pode ser usado para padronizar backend, banco e dashboard.</td></tr>
+        </table>
+
+        <h2>8. Arquitetura proposta</h2>
+
+        <div class="arch-v3">
+                <span style="font-size:12px">Arquitetura em camadas: coleta local → comunicação segura → nuvem → processamento → armazenamento → análise → entrega de dados ao cliente.</span>
+                <br><br>
+            
+            <div class="layer">
+                <div class="layer-title">ON-PREMISE — AMBIENTE DO CLIENTE</div>
+                <div class="layer-subtitle"; style="font-size:12px">Equipamento monitorado, aquisição, processamento local e contingência operacional</div>
+
+                <div class="grid grid-4">
+                    <div class="node primary"><strong>MPU6050</strong><span>Vibração X/Y/Z</span></div>
+                    <div class="node primary"><strong>DS18B20</strong><span>Temperatura</span></div>
+                    <div class="node"><strong>Máquina Pick-and-Place</strong><span>Origem dos eventos</span></div>
+                    <div class="node"><strong>Rede Industrial</strong><span>Conectividade local</span></div>
+                </div>
+                <br>    
+                <div class="arrow">↓</div>
+                <br>
+                <div class="grid grid-5">
+                    <div class="node"><strong>ESP32</strong><span>Aquisição</span></div>
+                    <div class="node"><strong>Pré-processamento</strong><span>Filtro e validação</span></div>
+                    <div class="node"><strong>Cálculo Local</strong><span>RMS e indicadores</span></div>
+                    <div class="node"><strong>Buffer Local</strong><span>Retenção temporária</span></div>
+                    <div class="node"><strong>Gateway Edge</strong><span>Envio para nuvem</span></div>
+                </div>
+            </div>
+            <br>
+            <div class="arrow" style="font-size:11px;margin:1px 0;">↓ MQTT / TLS — INTERNET ↓</div>
+            <br>
+
+            <div class="layer">
+                <div class="layer-title">NUVEM — PLATAFORMA DA EMPRESA</div>
+                <div class="layer-subtitle"; style="font-size:12px">Recepção, processamento, armazenamento, APIs e visualização</div>
+
+                <div class="mini-flow">
+                    <div class="mini">IoT Core / IoT Hub</div>
+                    <div class="arr">→</div>
+                    <div class="mini">Ingestão</div>
+                    <div class="arr">→</div>
+                    <div class="mini">RAW</div>
+                    <div class="arr">→</div>
+                    <div class="mini">Processamento</div>
+                    <div class="arr">→</div>
+                    <div class="mini">Banco</div>
+                    <div class="arr">→</div>
+                    <div class="mini">API</div>
+                    <div class="arr">→</div>
+                    <div class="mini">Dashboard</div>
+                </div>
+                <br>
+                <div class="two-clouds">
+                    <div class="cloud-box">
+                        <div class="cloud-title"><strong>AWS CLOUD</strong><small>Produção principal</small></div>
+                        <div class="service-grid">
+                            <div class="service"><strong>AWS IoT Core</strong><span>Conectividade</span></div>
+                            <div class="service"><strong>Kinesis</strong><span>Streaming</span></div>
+                            <div class="service"><strong>S3 RAW</strong><span>Data Lake</span></div>
+                            <div class="service"><strong>Lambda</strong><span>Transformação</span></div>
+                            <div class="service"><strong>EC2</strong><span>Backend</span></div>
+                            <div class="service"><strong>RDS</strong><span>Histórico</span></div>
+                            <div class="service"><strong>S3 Processed</strong><span>Dados tratados</span></div>
+                            <div class="service"><strong>API</strong><span>Serviços</span></div>
+                            <div class="service"><strong>Dashboard</strong><span>Visualização</span></div>
+                        </div>
+                    </div>
+
+                    <div class="cloud-box azure">
+                        <div class="cloud-title"><strong>AZURE CLOUD</strong><small>Contingência</small></div>
+                        <div class="service-grid">
+                            <div class="service"><strong>IoT Hub</strong><span>IoT</span></div>
+                            <div class="service"><strong>Event Hubs</strong><span>Eventos</span></div>
+                            <div class="service"><strong>Blob RAW</strong><span>Dados brutos</span></div>
+                            <div class="service"><strong>Functions</strong><span>Serverless</span></div>
+                            <div class="service"><strong>Data Explorer</strong><span>Análise</span></div>
+                            <div class="service"><strong>App Service</strong><span>Aplicações</span></div>
+                            <div class="service"><strong>Blob Processed</strong><span>Tratados</span></div>
+                            <div class="service"><strong>Monitor</strong><span>Observabilidade</span></div>
+                            <div class="service"><strong>Backup / DR</strong><span>Continuidade</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="arch-v3">
+            <div class="layer">
+                <div class="layer-title"; style="font-size:12px">FLUXO DE DADOS E PROCESSAMENTO</div>
+                <div class="mini-flow">
+                    <div class="mini">Sensores</div><div class="arr">→</div>
+                    <div class="mini">ESP32</div><div class="arr">→</div>
+                    <div class="mini">Edge</div><div class="arr">→</div>
+                    <div class="mini">MQTT/TLS</div><div class="arr">→</div>
+                    <div class="mini">IoT Platform</div><div class="arr">→</div>
+                    <div class="mini">RAW</div><div class="arr">→</div>
+                    <div class="mini">ETL</div><div class="arr">→</div>
+                    <div class="mini">Banco</div><div class="arr">→</div>
+                    <div class="mini">Analytics</div><div class="arr">→</div>
+                    <div class="mini">Dashboard</div>
+                </div>
+            </div>
+            <br>
+            <div class="layer">
+                <div class="layer-title"; style="font-size:12px">SEGURANÇA E GOVERNANÇA — CAMADA TRANSVERSAL</div>
+                <div class="security-strip">
+                    <div class="security-item"><strong>IAM / Entra ID</strong><span>Acesso</span></div>
+                    <div class="security-item"><strong>KMS / Key Vault</strong><span>Segredos</span></div>
+                    <div class="security-item"><strong>TLS</strong><span>Criptografia</span></div>
+                    <div class="security-item"><strong>Auditoria</strong><span>Logs</span></div>
+                    <div class="security-item"><strong>Firewall</strong><span>Rede</span></div>
+                </div>
+            </div>
+            <br>
+            <div class="layer">
+                <div class="layer-title"; style="font-size:12px">ENTREGA DO SERVIÇO AO CLIENTE</div>
+                <div class="business-output">
+                    <div class="output">Histórico</div>
+                    <div class="output">Indicadores</div>
+                    <div class="output">Tendências</div>
+                    <div class="output">Alertas</div>
+                    <div class="output">Relatórios</div>
+                </div>
+                <br>
+                <div class="arrow">↓</div>
+                <br>
+                <div class="node company">
+                    <strong ; style="font-size:12px">CLIENTE — MANUTENÇÃO / ENGENHARIA / GESTÃO</strong>
+                    <span ; style="font-size:12px">Consumo dos dados para tomada de decisão.</span>
+                </div>
+            </div>
+        </div>
+  
+        <img class="logo-infra"
+            src="C:\Users\etmca\OneDrive\Área de Trabalho\Pesquisa e Inovação III\images\Modelo Infraestrutura.png"
+            alt="Vibra Data — Monitoramento de Vibração em Máquinas">
+
+
+        <h2>9. Análise de Dados</h2>
+        <table>
+            <tr><th>Análise</th><th>O que mostra</th><th>Uso</th></tr>
+            <tr><td>Aceleração X/Y/Z</td><td>Comportamento da vibração por eixo.</td><td>Visualizar mudanças.</td></tr>
+            <tr><td>Temperatura</td><td>Variação térmica da máquina.</td><td>Detectar aquecimento anormal.</td></tr>
+            <tr><td>RMS</td><td>Energia/nível médio do sinal vibratório.</td><td>Comparar condição.</td></tr>
+            <tr><td>Pico</td><td>Maior aceleração observada.</td><td>Identificar impactos ou eventos.</td></tr>
+            <tr><td>Tendência</td><td>Evolução ao longo do tempo.</td><td>Perceber degradação.</td></tr>
+            <tr><td>FFT</td><td>Componentes de frequência.</td><td>Encontrar frequências dominantes.</td></tr>
+            <tr><td>Anomalia</td><td>Desvio em relação ao padrão.</td><td>Gerar alerta para investigação.</td></tr>
+        </table>
+        <div class="callout"><strong>IMPORTANTE</strong>
+            <br>O sistema não deve afirmar que uma máquina está “com defeito” apenas por um valor de vibração ou temperatura. No MVP, 
+            o resultado será tratado como indicação de comportamento anormal que precisa ser investigado.</div>
+        
+        <h2>10. Plano de execução</h2>
+        <table>
+            <tr><th>Fase</th><th>Entrega</th><th>Resultado esperado</th></tr>
+            <tr><td>1. Planejamento</td><td>Requisitos + pontos de medição</td><td>Escopo definido</td></tr>
+            <tr><td>2. Hardware</td><td>MPU6050 + DS18B20 + ESP32 funcionando</td><td>Leitura confiável</td></tr>
+            <tr><td>3. Comunicação</td><td>Envio dos dados</td><td>Dados chegando ao servidor</td></tr>
+            <tr><td>4. Armazenamento</td><td>Banco/CSV</td><td>Histórico disponível</td></tr>
+            <tr><td>5. Análise</td><td>RMS, pico, temperatura e FFT</td><td>Indicadores calculados</td></tr>
+            <tr><td>6. Anomalias</td><td>Baseline + limiar</td><td>Sinalização de desvios</td></tr>
+            <tr><td>7. Dashboard</td><td>Painel visual</td><td>Apresentação dos resultados</td></tr>
+            <tr><td>8. Validação</td><td>Testes controlados</td><td>Confirmação de confiabilidade</td></tr>
+        </table>
+
+        <h2>11. Riscos e como reduzir</h2>
+        <table>
+            <tr><th>Risco</th><th>Impacto</th><th>Mitigação</th></tr>
+            <tr><td>Sensor mal fixado</td><td>Leitura inconsistente</td><td>Usar fixação firme e repetir testes.</td></tr>
+            <tr><td>Taxa de amostragem inadequada</td><td>Frequências podem não ser observadas</td><td>Definir taxa conforme a análise desejada.</td></tr>
+            <tr><td>Ruído do sensor</td><td>Falsas anomalias</td><td>Filtragem e baseline.</td></tr>
+            <tr><td>Wi-Fi instável</td><td>Perda de dados</td><td>Buffer local e/ou reenvio em evolução.</td></tr>
+            <tr><td>Poucos dados</td><td>Modelo fraco de anomalia</td><td>Coletar períodos normal e alterado.</td></tr>
+            <tr><td>Interpretação incorreta</td><td>Diagnóstico indevido</td><td>Tratar alertas como apoio à investigação.</td></tr>
+            <tr><td>Temperatura excessiva</td><td>Erro de leitura</td><td>Monitorar ambiente e proteger cabeamento.</td></tr>
+            <tr><td>Interferência eletromagnética</td><td>Picos falsos</td><td>Blindagem e filtros.</td></tr>
+        </table>
+
+        <h2>12. Matriz de Risco</h2>
+        <div class="risk-matrix">
+            <p class="risk-intro">
+                A matriz abaixo consolida os principais riscos técnicos, operacionais e de dados identificados
+                a partir do contexto do projeto. A classificação considera <strong>Probabilidade (P)</strong> e
+                <strong>Impacto (I)</strong>, ambas em escala de 1 a 5. O nível de risco é calculado por
+                <strong>R = P × I</strong>. As ações propostas preservam o escopo do MVP e priorizam prevenção,
+                detecção e contingência.
+            </p>
+
+            <div class="risk-legend">
+                <div class="risk-legend-item"><strong>1–5</strong>Muito Baixo</div>
+                <div class="risk-legend-item"><strong>6–12</strong>Baixo</div>
+                <div class="risk-legend-item"><strong>13–30</strong>Moderado</div>
+                <div class="risk-legend-item"><strong>31–60</strong>Alto</div>
+                <div class="risk-legend-item"><strong>61–125</strong>Muito Alto</div>
+            </div>
+
+            <table class="risk-table">
+                <tr>
+                    <th>Sistema</th><th>Ativo</th><th>Vulnerabilidade</th><th>Probabilidade</th><th>Severidade</th><th>Relevância</th>
+                    <th>Grau de Risco</th><th>Consequência</th><th>Controle / Ação</th>
+                </tr>
+                <tr>
+                    <td>IoT</td><td>Sensor</td><td>Fixação inadequada na máquina</td><td class="risk-score">3</td><td class="risk-score">4</td><td class="risk-score">3</td>
+                    <td class="risk-level risk-high">36 - Alto</td><td>Leituras inconsistentes e falsos desvios</td>
+                    <td>Definir ponto de instalação, fixação firme, inspeção periódica e testes repetidos de validação.</td>
+                </tr>
+                <tr>
+                    <td>Dados</td><td>Taxa de amostragem inadequada</td><td>Configuração incompatível com a análise de frequência</td><td class="risk-score">3</td><td class="risk-score">4</td><td class="risk-score">4</td>
+                    <td class="risk-level risk-high">48 - Alto</td><td>Frequências relevantes podem não ser observadas</td>
+                    <td>Definir taxa conforme o fenômeno monitorado e validar com testes controlados antes da análise FFT.</td>
+                </tr>
+                <tr>
+                    <td>Ambiente</td><td>Ruído / interferência de medição</td><td>Ruído elétrico ou mecânico no sinal</td><td class="risk-score">4</td><td class="risk-score">4</td><td class="risk-score">5</td>
+                    <td class="risk-level risk-critical">80 - Muito alto</td><td>Falsos alarmes e perda de confiança no sistema</td>
+                    <td>Filtragem e validação no ESP32, baseline, repetição de medições e proteção contra interferência eletromagnética.</td>
+                </tr>
+                <tr>
+                    <td>Internet</td><td>Wi-Fi instável</td><td>Oscilação ou indisponibilidade da rede</td><td class="risk-score">3</td><td class="risk-score">3</td><td class="risk-score">4</td>
+                    <td class="risk-level risk-high">36 - Alto</td><td>Perda ou atraso na transmissão das leituras</td>
+                    <td>Buffer local no edge, reenvio quando disponível e monitoramento da conectividade.</td>
+                </tr>
+                <tr>
+                    <td>Dados</td><td>Poucos dados históricos</td><td>Período insuficiente de coleta normal e alterada</td><td class="risk-score">4</td><td class="risk-score">5</td><td class="risk-score">4</td>
+                    <td class="risk-level risk-critical">80 - Muito alto</td><td>Baseline fraco e detecção de anomalias pouco confiável</td>
+                    <td>Coletar histórico suficiente em condições normais e em testes controlados antes de ampliar regras de anomalia.</td>
+                </tr>
+                <tr>
+                    <td>Dados</td><td>Interpretação incorreta do alerta</td><td>Tratar indicação de anomalia como diagnóstico definitivo</td><td class="risk-score">5</td><td class="risk-score">5</td><td class="risk-score">4</td>
+                    <td class="risk-level risk-critical">100 - Muito alto</td><td>Decisão de manutenção inadequada</td>
+                    <td>Deixar explícito que alertas são indícios; exigir investigação técnica e correlação com histórico, RMS, pico, FFT e temperatura.</td>
+                </tr>
+                <tr>
+                    <td>Ambiente</td><td>Temperatura excessiva / ambiente adverso</td><td>Condição ambiental fora da faixa esperada</td><td class="risk-score">2</td><td class="risk-score">4</td><td class="risk-score">3</td>
+                    <td class="risk-level risk-medium">24 - Moderado</td><td>Erro de leitura ou degradação do conjunto</td>
+                    <td>Monitorar condições do ambiente, proteger cabeamento e validar leituras durante a implantação.</td>
+                </tr>
+                <tr>
+                    <td>Hardware</td><td>Falha do ESP32 / alimentação</td><td>Perda de energia, travamento ou falha de hardware</td><td class="risk-score">3</td><td class="risk-score">4</td><td class="risk-score">5</td>
+                    <td class="risk-level risk-high">60 - Alto</td><td>Interrupção da aquisição e lacunas no histórico</td>
+                    <td>Validar alimentação, reinicialização controlada, registrar status do dispositivo e manter contingência local.</td>
+                </tr>
+                <tr>
+                    <td>Dados</td><td>Perda / corrupção de dados</td><td>Falha de transmissão, armazenamento ou processamento</td><td class="risk-score">5</td><td class="risk-score">5</td><td class="risk-score">5</td>
+                    <td class="risk-level risk-critical">125 - Muito alto</td><td>Histórico incompleto e análise comprometida</td>
+                    <td>Persistência RAW, validação de dados, buffer local, logs e rotina de backup/recuperação.</td>
+                </tr>
+                <tr>
+                    <td>Internet</td><td>Indisponibilidade do backend / nuvem</td><td>Falha de serviço ou infraestrutura</td><td class="risk-score">4</td><td class="risk-score">2</td><td class="risk-score">5</td>
+                    <td class="risk-level risk-high">40 - Alto</td><td>Dashboard e processamento indisponíveis</td>
+                    <td>Separação entre coleta e processamento, retenção local, monitoramento e arquitetura de contingência AWS/Azure prevista no projeto.</td>
+                </tr>
+                <tr>
+                    <td>Dados</td><td>Acesso indevido aos dados</td><td>Credenciais, permissões ou configuração de rede inad equadas</td><td class="risk-score">3</td><td class="risk-score">5</td><td class="risk-score">3</td>
+                    <td class="risk-level risk-high">45 -Alto</td><td>Exposição ou alteração indevida dos dados</td>
+                    <td>IAM/Entra ID, gerenciamento de segredos, TLS, firewall e auditoria conforme a camada de segurança proposta.</td>
+                </tr>
+                <tr>
+                    <td>Desenvolvimento</td><td>Escopo excessivo do MVP</td><td>Tentar antecipar múltiplas máquinas, ML ou integrações</td><td class="risk-score">4</td><td class="risk-score">3</td><td class="risk-score">3</td>
+                    <td class="risk-level risk-high">36 - Alto</td><td>Atraso na validação do núcleo do produto</td>
+                    <td>Manter foco em uma máquina, dois sensores e pipeline coleta → análise → visualização; evoluir por fases.</td>
+                </tr>
+            </table>
+
+            <h3>12.1 — Prioridades para o MVP</h3>
+            <ol>
+                <li><strong>Confiabilidade da medição:</strong> validar fixação, taxa de amostragem, ruído e interferência antes de interpretar anomalias.</li>
+                <li><strong>Confiabilidade dos dados:</strong> garantir coleta, timestamp, armazenamento, buffer e recuperação de perdas.</li>
+                <li><strong>Qualidade do baseline:</strong> construir histórico suficiente do comportamento normal antes de estabelecer regras de anomalia.</li>
+                <li><strong>Uso correto dos alertas:</strong> comunicar claramente que o sistema apoia a investigação e não substitui o diagnóstico técnico.</li>
+                <li><strong>Continuidade:</strong> preservar dados localmente e utilizar a arquitetura de contingência prevista para reduzir dependência de um único componente.</li>
+            </ol>
+        </div>
+
+        <h2>13. Conclusão</h2>
+        <p>A solução proposta combina IoT e análise de dados para transformar vibrações e temperaturas da máquina Pick-and-Place em informações úteis para manutenção e acompanhamento operacional. O uso do MPU6050 e DS18B20 junto ao ESP32 reduz o custo e facilita a construção do protótipo. O pré-processamento na borda garante maior confiabilidade dos dados e diminui o tráfego de rede. A arquitetura separa aquisição, armazenamento e análise, permitindo evolução gradual sem comprometer o MVP.</p>
+    </div>
+
+
+<!-- Botão para baixar o projeto em PDF -->
+<div id="download-project" style="position:fixed;right:24px;bottom:24px;z-index:9999">
+    <button
+        id="download-project-btn"
+        type="button"
+        onclick="downloadProjectPDF()"
+        style="border:0;border-radius:8px;padding:12px 18px;background:#1E2942;color:#fff;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.18)"
+    >
+        Baixar PDF contínuo
+    </button>
+</div>
+
+<script>
+
+function downloadProjectPDF() {
+    const printWindow = window.open('', '_blank', 'width=1200,height=900');
+    if (!printWindow) {
+        alert('Permita janelas pop-up para gerar o PDF.');
+        return;
+    }
+
+    const pageWidth = 1000;
+    const pageMargin = 30;
+    const documentWidth = pageWidth + (pageMargin * 2);
+
+    printWindow.document.open();
+    printWindow.document.write('<!DOCTYPE html>' + document.documentElement.outerHTML);
+    printWindow.document.close();
+    printWindow.document.title = 'Monitoramento de Vibração em Máquinas — Pick and Place';
+
+    printWindow.addEventListener('load', function preparePrint() {
+        const printButton = printWindow.document.getElementById('download-project');
+        if (printButton) printButton.remove();
+
+        const printStyle = printWindow.document.createElement('style');
+        const pages = printWindow.document.querySelectorAll('.page');
+        const lastPage = pages[pages.length - 1];
+
+        printStyle.textContent = `
+            *, *::before, *::after {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            html, body {
+                width: ${documentWidth}px !important;
+                min-width: ${documentWidth}px !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: hidden !important;
+                background: #D4D7D8 !important;
+            }
+            .page {
+                width: ${pageWidth}px !important;
+                max-width: ${pageWidth}px !important;
+                min-width: ${pageWidth}px !important;
+                margin: ${pageMargin}px auto !important;
+                break-before: auto !important;
+                break-after: auto !important;
+                break-inside: auto !important;
+                page-break-before: auto !important;
+                page-break-after: auto !important;
+                page-break-inside: auto !important;
+            }
+            .page:last-of-type { margin-bottom: 0 !important; }
+            .persona-card { grid-template-columns: 180px 1fr !important; }
+            .persona-grid { grid-template-columns: 1fr 1fr !important; }
+            .persona-photo { height: 210px !important; }
+            .journey-flow { grid-template-columns: repeat(5, 1fr) !important; }
+            .journey-head { display: flex !important; }
+            .journey-context { text-align: right !important; }
+            .arch-v3 .grid-3 { grid-template-columns: repeat(3, 1fr) !important; }
+            .arch-v3 .grid-4 { grid-template-columns: repeat(4, 1fr) !important; }
+            .arch-v3 .grid-5 { grid-template-columns: repeat(5, 1fr) !important; }
+            .arch-v3 .service-grid,
+            .arch-v3 .two-clouds { grid-template-columns: 1fr 1fr !important; }
+            .arch-v3 .security-strip,
+            .arch-v3 .business-output { grid-template-columns: repeat(5, 1fr) !important; }
+            .arch-v3 .flow-row { grid-template-columns: 1fr 42px 1fr !important; }
+        `;
+        printWindow.document.head.appendChild(printStyle);
+        printWindow.document.body.offsetHeight;
+
+        lastPage.style.marginBottom = '0';
+        const documentHeight = Math.ceil(lastPage.offsetTop + lastPage.offsetHeight);
+        printStyle.textContent = `
+            @page { size: ${documentWidth}px ${documentHeight}px; margin: 0; }
+            html, body {
+                height: ${documentHeight}px !important;
+                max-height: ${documentHeight}px !important;
+                overflow: hidden !important;
+            }
+        ` + printStyle.textContent;
+        printWindow.focus();
+        printWindow.addEventListener('afterprint', function closePrintWindow() {
+            printWindow.close();
+        }, { once: true });
+        printWindow.print();
+    }, { once: true });
+}
+</script>
+
+</body>
+</html>
