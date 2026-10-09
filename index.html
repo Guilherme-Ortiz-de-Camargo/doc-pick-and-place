@@ -27,13 +27,11 @@
             </div>
         
         <h2>1. Contexto de negócio</h2>
-            <p>Máquinas industriais como as <strong>Pick-and-Place</strong> operam em ciclos repetitivos e com alta exigência de disponibilidade. Em um ambiente de produção contínua, qualquer degradação mecânica silenciosa pode evoluir para uma falha funcional antes que a equipe perceba a mudança de condição no momento adequado. Esse tipo de equipamento depende diretamente de ajustes de alinhamento, balanço, folgas e desgaste de componentes rotativos; por isso, a vibração e a temperatura tornam-se indicadores estratégicos para a manutenção preditiva.</p>
+            <p>As máquinas <strong>Pick-and-Place</strong> são ativos críticos nas linhas SMT (Surface Mount Technology), sendo responsáveis pelo posicionamento automático de milhares de componentes eletrônicos com alta precisão, repetibilidade e disponibilidade. Em operação contínua, qualquer degradação mecânica silenciosa pode evoluir para uma falha funcional antes que a equipe perceba a mudança de condição no momento adequado. O desgaste de rolamentos, eixos, acoplamentos, fusos, correias e estruturas de suporte tende a alterar a vibração e a temperatura do equipamento, tornando esses parâmetros indicadores estratégicos para a manutenção preditiva.</p>
 
-            <p>O desafio central de negócio não é apenas o custo do conserto, mas a perda de capacidade produtiva provocada por falhas que não são antecipadas. Quando um conjunto mecânico, como rolamento, eixo, acoplamento ou estrutura de suporte, começa a apresentar vibração excessiva ou aquecimento anormal, a máquina pode continuar operando por um período antes de falhar de forma mais severa. Esse intervalo é crítico: é o momento em que a empresa pode agir, mas apenas quando há dados contínuos e históricos confiáveis para comparar o comportamento atual com uma linha de base de operação normal.</p>
+            <p>O desafio central de negócio não é apenas o custo do conserto, mas a perda de capacidade produtiva provocada por falhas que não são antecipadas. Quando um conjunto mecânico começa a apresentar vibração excessiva ou aquecimento anormal, a máquina pode continuar operando por um período antes de falhar de forma mais severa. Esse intervalo é crítico: é o momento em que a empresa pode agir, mas apenas quando dispõe de dados contínuos e históricos confiáveis para comparar o comportamento atual com uma linha de base de operação normal.</p>
 
-            <p>O impacto comercial vai além da manutenção imediata. Uma parada não planejada gera atraso de pedidos, desperdício de materiais em processo, uso de mão de obra de emergência, redução do rendimento da linha e risco de desvio em relação às metas de produção. Em plantas que dependem da continuidade operacional, essas perdas são frequentemente mais relevantes do que o custo direto do componente ou da intervenção técnica.</p>
-
-            <p>Este projeto busca gerar tempo de resposta: identificar sinais de degradação enquanto ainda existe oportunidade de planejar uma inspeção, antes que a falha comprometa a produção.</p>
+            <p>O impacto comercial vai além da manutenção imediata. Uma parada não planejada gera atraso de pedidos, desperdício de materiais em processo, uso de mão de obra de emergência, redução do rendimento da linha e risco de desvio em relação às metas de produção. A partir do monitoramento com sensores, como o MPU6050 e o DS18B20, a empresa passa a registrar evidências objetivas da condição do equipamento, reduzindo a dependência de inspeções pontuais e permitindo agir antes que pequenas anomalias evoluam para falhas capazes de interromper a produção.</p>
 
         <h3>1.1 — Case</h3>
             <p>Um exemplo relevante para esta proposta é a operação global da Flex, uma das maiores empresas de manufatura eletrônica do mundo. Em reportagem publicada pela IndustryWeek, a unidade da Flex em Althofen, na Áustria, foi apresentada como um dos ambientes industriais mais avançados da companhia, reunindo conceitos de Indústria 4.0, Internet das Coisas Industrial (IIoT), Inteligência Artificial, Digital Twin e manutenção preditiva.</p>
@@ -51,7 +49,7 @@
             </div>
 
         <h3>1.2 — Origem do desafio operacional</h3>
-            <p>O problema central surge quando a empresa conta com uma máquina crítica, mas não dispõe de uma série histórica confiável sobre a sua condição mecânica. Inspeções visuais, medições manuais e relatos de operadores continuam sendo importantes, porém são pontuais e dependem do momento em que a equipe observa o equipamento. Uma alteração que ocorre entre duas inspeções pode não ser registrada. Além disso, sem dados anteriores, torna-se difícil distinguir um comportamento normal de um desvio relevante.</p>
+            <p>O desafio central surge quando a empresa conta com uma máquina crítica, mas não dispõe de uma série histórica confiável sobre a sua condição mecânica. Inspeções visuais, medições manuais e relatos de operadores continuam sendo importantes, porém são pontuais e dependem do momento em que a equipe observa o equipamento. Uma alteração que ocorre entre duas inspeções pode não ser registrada. Além disso, sem dados anteriores, torna-se difícil distinguir um comportamento normal de um desvio relevante.</p>
 
             <p>A ausência de histórico também prejudica a análise de causa. Quando a máquina apresenta erro de posicionamento, ruído, perda de velocidade ou parada, a equipe precisa investigar com pouca evidência sobre a evolução do evento. O resultado pode ser uma troca preventiva desnecessária, uma manutenção demorada ou a retomada da operação sem que a causa tenha sido completamente compreendida.</p>
 
@@ -67,51 +65,33 @@
 
             <p>A combinação entre temperatura e vibração reduz o risco de interpretar um único sinal de forma isolada. Uma vibração momentânea pode ser causada por uma condição passageira; uma elevação térmica isolada pode estar relacionada ao ambiente. Quando os sinais são observados em conjunto e ao longo do tempo, a equipe consegue investigar com mais contexto e reduzir falsos alarmes.</p>
 
-        <h3>1.5 — Máquinas Pick-and-Place com sensores IoT</h3>
-
-            <p>As máquinas Pick-and-Place estão entre os ativos mais importantes das linhas SMT (Surface Mount Technology), sendo responsáveis pelo posicionamento automático de milhares de componentes eletrônicos nas placas de circuito. Sua operação exige elevada precisão mecânica, repetibilidade e disponibilidade, pois pequenas variações podem impactar diretamente a qualidade do produto final.</p>
-
-            <p>Durante o funcionamento, diversos componentes mecânicos estão sujeitos a desgaste progressivo, incluindo motores, rolamentos, fusos, correias, sistemas de movimentação linear e cabeçotes de posicionamento. Em muitos casos, o equipamento continua operando mesmo após o início da degradação, dificultando a identificação precoce do problema apenas por inspeções visuais ou observação dos operadores.</p>
-
-            <p>A vibração é um dos primeiros sinais físicos de alteração na condição mecânica de um equipamento industrial. Desalinhamentos, folgas, desgaste de rolamentos, desequilíbrios e problemas de movimentação normalmente provocam mudanças no comportamento vibratório antes da ocorrência de falhas mais graves. Da mesma forma, aumentos anormais de temperatura podem indicar atrito excessivo, sobrecarga mecânica, deficiência de lubrificação ou degradação de componentes internos.</p>
-
-            <p>Ao instalar sensores MPU6050 e DS18B20 em uma máquina Pick-and-Place, torna-se possível acompanhar continuamente esses indicadores e construir um histórico operacional do equipamento. Esse histórico permite comparar o comportamento atual com padrões de operação normal, facilitando a identificação de desvios que poderiam passar despercebidos em inspeções pontuais.</p>
-
-            <p>Além da manutenção preditiva, os dados coletados podem apoiar análises de disponibilidade, confiabilidade e eficiência operacional. A equipe de manutenção passa a possuir evidências objetivas sobre a evolução da condição do ativo, reduzindo a dependência exclusiva de percepções subjetivas ou da ocorrência de falhas para iniciar investigações.</p>
-
-            <p>Essa abordagem está alinhada aos princípios de Indústria 4.0 adotados pela Flex. Na planta de Althofen, mais de 500 dispositivos IIoT coletam continuamente dados dos equipamentos para alimentar plataformas analíticas, modelos preditivos e sistemas de suporte à decisão. Os gestores da empresa destacam que os sensores permitem transformar eventos físicos da operação em informações úteis para evitar paradas não planejadas, melhorar a eficiência energética e aumentar a disponibilidade dos ativos industriais.</p>
-
-            <div class="journey-outcome">
-            O objetivo dos sensores não é apenas medir vibração e temperatura. Seu principal valor está em transformar sinais físicos da máquina em informações que permitam agir antes que pequenas anomalias evoluam para falhas capazes de interromper a produção.
-            </div>
-
-        <h3>1.6 — Funcionamento integrado da solução</h3>
+        <h3>1.5 — Funcionamento integrado da solução</h3>
             <p>O MPU6050 e o DS18B20 serão conectados ao <strong>ESP32</strong>, que realizará a aquisição, a validação inicial e o processamento local das leituras. O microcontrolador poderá filtrar valores inválidos, registrar marcações de tempo, organizar pacotes e manter um buffer temporário quando a conexão estiver indisponível. Depois, os dados serão encaminhados por comunicação segura para a plataforma em nuvem.</p>
 
             <p>Na nuvem, a arquitetura AWS e Azure prevista no projeto separa ingestão, armazenamento, processamento, observabilidade e visualização. Os dados brutos devem ser preservados para auditoria e reprocessamento; os dados tratados podem alimentar indicadores, regras de anomalia e dashboard. Essa divisão permite que a empresa tenha rastreabilidade do dado desde o sensor até a decisão de manutenção.</p>
 
-        <h3>1.7 — Necessidade de negócio e decisão de execução</h3>
-            <p>A experiência da Flex demonstra que a decisão de investir em monitoramento contínuo não ocorre apenas por questões técnicas. Os gestores destacam que a previsibilidade operacional se tornou um diferencial competitivo. Quanto maior a capacidade de antecipar problemas, menor o impacto financeiro causado por paradas inesperadas, atrasos na produção e desperdício de materiais.</p>
+        <h3>1.6 — Necessidade de negócio e decisão de execução</h3>
+            <p>A experiência da Flex demonstra que a decisão de investir em monitoramento contínuo não ocorre apenas por questões técnicas. Os gestores destacam que a previsibilidade operacional se tornou um diferencial competitivo. Quanto maior a capacidade de antecipar desafios, menor o impacto financeiro causado por paradas inesperadas, atrasos na produção e desperdício de materiais.</p>
 
             <p>Outro aspecto citado é a necessidade de transformar grandes volumes de dados em informações acionáveis. O simples armazenamento das leituras não gera valor. O benefício surge quando os dados são convertidos em indicadores, tendências e alertas capazes de apoiar decisões da operação e da manutenção.</p>
 
             <p>A execução se justifica quando o impacto de uma parada supera o esforço de monitorar o equipamento. Uma falha pode causar perda de produção, atraso, retrabalho, mobilização emergencial e dificuldade para identificar a causa. O investimento em sensores, comunicação e armazenamento permite substituir decisões baseadas apenas em percepção por evidências históricas úteis para operadores, manutenção, engenharia e gestão.</p>
 
-        <h3>1.8 — Objetivo e resultados pretendidos</h3>
+        <h3>1.7 — Objetivo e resultados pretendidos</h3>
             <p>O objetivo é validar um protótipo capaz de medir vibração e temperatura, processar leituras, armazenar histórico e apresentar informações úteis à manutenção. O fluxo completo deverá conectar sensor, ESP32, comunicação, nuvem, indicadores, alerta e investigação, gerando uma referência de operação normal e uma base para futuras ampliações.</p>
 
             <p>O sistema apoiará a manutenção sem substituir inspeções, instrumentos profissionais ou o julgamento técnico.</p>
 
-        <h3>1.9 — Escopo</h3>
+        <h3>1.8 — Escopo</h3>
             <p>O escopo inicial contempla uma máquina, um conjunto de sensores, um ESP32, comunicação por Wi-Fi, processamento básico, armazenamento histórico, indicadores de vibração e temperatura, regras iniciais de anomalia e dashboard. A primeira versão deve priorizar a confiabilidade da medição e a qualidade do histórico antes de incluir análises avançadas.</p>
 
-        <h3>1.10 — Limites e evolução</h3>
+        <h3>1.9 — Limites e evolução</h3>
             <p>O MVP não inclui diagnóstico automático definitivo, certificação de segurança funcional, integração imediata com ERP/MES, monitoramento de dezenas de máquinas ou previsão de qualquer falha por machine learning. Essas evoluções dependem de histórico suficiente, validação técnica e critérios de governança.</p>
             
-        <h3>1.11 — Benefícios e critérios de sucesso</h3>
+        <h3>1.10 — Benefícios e critérios de sucesso</h3>
             <p>Os benefícios esperados são maior disponibilidade, intervenções mais planejadas, histórico de condição e priorização técnica das inspeções. O projeto será bem-sucedido quando os sensores apresentarem leituras estáveis, os dados forem transmitidos e armazenados com rastreabilidade, o dashboard mostrar tendências compreensíveis e cada alerta puder ser relacionado a uma investigação. O alerta será sempre um indício, nunca um diagnóstico automático.</p>
 
-        <h3>1.12 — Cronograma de execução</h3>
+        <h3>1.11 — Cronograma de execução</h3>
             <table>
                 <tr><th>Fase</th><th>Período</th><th>Entrega e justificativa</th></tr>
                 <tr><td>1. Diagnóstico do ativo e requisitos</td><td>Semana 1</td><td>Definição do ponto de instalação, variáveis, riscos e indicadores necessários.</td></tr>
